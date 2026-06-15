@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UTOME · Painel da Família</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--violet:#7C6FE0;--violet-dark:#5B4FC9;--bg:#F6F4FB;--card:#FFFFFF;--ink:#2B2A3D;--muted:#8B889C;--line:#E7E3F3;--blue:#6FA8E0;--green:#5FCBA3;--purple:#B68CE0;--yellow:#F0C674;--radius:18px;--red:#E74C3C;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+  h1,h2,h3{font-family:'Quicksand',sans-serif;font-weight:700;}
+  
+  #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--violet),var(--violet-dark));display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px;}
+  .splash-logo{width:80px;height:80px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;animation:pulse 2s ease-in-out infinite;}
+  .splash-text{color:#fff;font-size:20px;font-weight:700;font-family:'Quicksand';}
+  .splash-bar{width:60px;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;overflow:hidden;}
+  .splash-bar-fill{height:100%;background:#fff;animation:slide 2s ease-in-out;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.1);opacity:0.8;}}
+  @keyframes slide{0%{width:0;}100%{width:100%;}}
+  
+  #onboarding{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;overflow:hidden;}
+  .onboarding-screen{display:none;min-height:100vh;padding:60px 20px 40px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+  .onboarding-screen.active{display:flex;}
+  .onboarding-screen .big-emoji{margin-bottom:20px;line-height:1;}
+  .onboarding-screen h1{font-size:32px;margin-bottom:12px;color:var(--ink);}
+  .onboarding-screen p{font-size:16px;color:var(--muted);margin-bottom:40px;max-width:400px;line-height:1.6;}
+  .onboarding-nav{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:8px;}
+  .onboarding-nav button{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer;}
+  .onboarding-nav button.active{background:var(--violet);}
+  .onboarding-btn{padding:14px 32px;border:none;border-radius:12px;background:var(--violet);color:#fff;font-weight:700;cursor:pointer;font-size:15px;margin-top:20px;}
+  
+  #offline-banner{display:none;position:fixed;top:0;left:0;right:0;background:#E74C3C;color:#fff;padding:12px;text-align:center;font-size:13px;font-weight:600;z-index:999;}
+  
+  #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+  .auth-card{background:var(--card);border-radius:var(--radius);padding:40px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(124,111,224,0.12);text-align:center;}
+  .auth-card .logo-heart{width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;}
+  .auth-card h1{font-size:24px;margin-bottom:4px;}
+  .auth-card p.subtitle{color:var(--muted);font-size:14px;margin-bottom:24px;}
+  .field{margin-bottom:14px;text-align:left;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink);}
+  .field input{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:14px;font-family:inherit;transition:border-color .15s;}
+  .field input:focus{outline:none;border-color:var(--violet);}
+  .btn{width:100%;padding:12px;border:none;border-radius:12px;background:var(--violet);color:#fff;font-weight:700;font-family:'Quicksand',sans-serif;font-size:15px;cursor:pointer;transition:background .15s;}
+  .btn:hover{background:var(--violet-dark);}
+  .btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .btn-ghost{background:none;border:none;color:var(--violet);font-weight:600;font-size:13px;cursor:pointer;margin-top:14px;}
+  .error-msg{background:#FDEDED;color:#C0392B;border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:12px;display:none;}
+  .loading{display:none;text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;}
+  
+  #app{display:none;max-width:1040px;margin:0 auto;padding:28px 20px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;}
+  .topbar .brand .heart{width:38px;height:38px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+  .topbar h1{font-size:20px;}
+  .topbar .greeting{font-size:13px;color:var(--muted);}
+  .logout{font-size:13px;color:var(--muted);cursor:pointer;background:none;border:none;text-decoration:underline;}
+  .layout{display:grid;grid-template-columns:240px 1fr;gap:24px;}
+  @media (max-width:760px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 6px 24px rgba(124,111,224,0.06);}
+  .panel h2{font-size:16px;margin-bottom:14px;}
+  
+  .child-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;cursor:pointer;font-size:14px;margin-bottom:6px;transition:background .15s;}
+  .child-item:hover{background:var(--bg);}
+  .child-item.active{background:var(--violet);color:#fff;}
+  .child-item small{display:block;font-size:11px;opacity:.7;font-family:monospace;}
+  .child-item.active small{color:#E8E4FA;}
+  .add-child{display:flex;gap:6px;margin-top:12px;}
+  .add-child input{flex:1;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-family:inherit;}
+  .add-child button{border:none;background:var(--violet);color:#fff;border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer;font-size:18px;}
+  
+  .routine-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+  .routine-header p{font-size:13px;color:var(--muted);margin-top:2px;}
+  .device-id-pill{font-family:monospace;font-size:12px;background:var(--bg);padding:5px 10px;border-radius:8px;color:var(--violet-dark);}
+  .day-toggle{display:flex;gap:6px;margin:14px 0 18px;}
+  .day-toggle button{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .day-toggle button.on{background:var(--violet);color:#fff;border-color:var(--violet);}
+  .task-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .task-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;}
+  .task-heart{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;}
+  .task-heart.blue{background:var(--blue);}
+  .task-heart.green{background:var(--green);}
+  .task-heart.purple{background:var(--purple);}
+  .task-heart.yellow{background:var(--yellow);}
+  .task-info{flex:1;}
+  .task-info .t-time{font-weight:700;font-size:14px;}
+  .task-info .t-name{font-size:13px;color:var(--muted);}
+  .task-days{font-size:11px;color:var(--muted);margin-top:2px;}
+  .task-actions button{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:4px 6px;}
+  .task-actions button:hover{color:#C0392B;}
+  .new-task{border-top:1px dashed var(--line);padding-top:16px;display:grid;grid-template-columns:110px 1fr 90px 110px auto;gap:10px;align-items:end;}
+  @media (max-width:700px){.new-task{grid-template-columns:1fr 1fr;}}
+  .new-task .field{margin-bottom:0;}
+  .new-task select, .new-task input{width:100%;padding:10px 10px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-family:inherit;}
+  
+  .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+  .empty-state .icon{margin-bottom:16px;line-height:1;}
+  .empty-state h3{font-size:20px;color:var(--ink);margin-bottom:8px;}
+  .empty-state p{font-size:14px;margin-bottom:24px;}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-logo"><img src="https://img.icons8.com/emoji/96/purple-heart.png" width="48" height="48" alt="heart"></div>
+  <div class="splash-text">UTOME</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<div id="offline-banner"><img src="https://img.icons8.com/emoji/96/satellite-antenna.png" width="16" height="16" style="vertical-align:middle" alt="offline"> Você está offline. Alguns recursos podem não estar disponíveis.</div>
+
+<div id="onboarding">
+  <div class="onboarding-screen active" data-step="0">
+    <div class="big-emoji"><img src="https://img.icons8.com/emoji/96/purple-heart.png" width="120" height="120" alt="heart"></div>
+    <h1>Bem-vindo ao UTOME</h1>
+    <p>Organize a rotina das crianças com tarefas diárias, lembretes inteligentes e recompensas.</p>
+  </div>
+  
+  <div class="onboarding-screen" data-step="1">
+    <div class="big-emoji"><img src="https://img.icons8.com/emoji/96/baby.png" width="120" height="120" alt="baby"></div>
+    <h1>Adicione Crianças</h1>
+    <p>Crie um perfil para cada criança. Cada uma terá seu próprio relógio inteligente.</p>
+  </div>
+  
+  <div class="onboarding-screen" data-step="2">
+    <div class="big-emoji"><img src="https://img.icons8.com/emoji/96/check-mark-button.png" width="120" height="120" alt="check"></div>
+    <h1>Configure Tarefas</h1>
+    <p>Defina horários, nomes, emojis e cores. O relógio mostra as próximas atividades em tempo real.</p>
+  </div>
+  
+  <div class="onboarding-nav">
+    <button class="active" onclick="goOnboarding(0)"></button>
+    <button onclick="goOnboarding(1)"></button>
+    <button onclick="goOnboarding(2)"></button>
+  </div>
+  
+  <div style="position:fixed;bottom:40px;right:40px;">
+    <button class="onboarding-btn" onclick="skipOnboarding()">Começar</button>
+  </div>
+</div>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="logo-heart"><img src="https://img.icons8.com/emoji/96/purple-heart.png" width="28" height="28" alt="heart"></div>
+    <h1 id="auth-title">Entrar</h1>
+    <p class="subtitle">Painel da família · UTOME</p>
+    <div class="loading" id="auth-loading">Conectando...</div>
+    <div class="error-msg" id="auth-error"></div>
+
+    <div id="register-fields" style="display:none;">
+      <div class="field">
+        <label>Seu nome</label>
+        <input type="text" id="reg-name" placeholder="Nome do responsável">
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="voce@email.com">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="auth-password" placeholder="••••••••">
+    </div>
+    <button class="btn" id="auth-submit">Entrar</button>
+    <button class="btn-ghost" id="auth-toggle">Não tem conta? Cadastre-se</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="heart"><img src="https://img.icons8.com/emoji/96/purple-heart.png" width="22" height="22" alt="heart"></div>
+      <div>
+        <h1>UTOME</h1>
+        <div class="greeting" id="greeting"></div>
+      </div>
+    </div>
+    <button class="logout" id="logout-btn">Sair</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Crianças</h2>
+      <div id="children-list"></div>
+      <div class="add-child">
+        <input type="text" id="new-child-name" placeholder="Nome da criança">
+        <button id="add-child-btn">+</button>
+      </div>
+    </div>
+
+    <div class="panel" id="routine-panel">
+      <div class="empty-state">
+        <div class="icon"><img src="https://img.icons8.com/emoji/96/direct-hit.png" width="64" height="64" alt="target"></div>
+        <h3>Selecione uma criança</h3>
+        <p>Escolha uma criança na esquerda para configurar sua rotina.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBmaTDtHrmPe4q8Hk4Ko5UCa3qKWfWnqAg",
+  authDomain: "tomi-ia.firebaseapp.com",
+  projectId: "tomi-ia",
+  storageBucket: "tomi-ia.firebasestorage.app",
+  messagingSenderId: "932306144435",
+  appId: "1:932306144435:web:0eb1f59da3825f77f7b4c6",
+  measurementId: "G-6HBR7K49MQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const DAY_LABELS = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+const COLORS = [{key:"blue",label:"Aguardando",icon:"blue-heart"},{key:"green",label:"Concluído",icon:"check-mark-button"},{key:"purple",label:"Recompensa",icon:"purple-heart"},{key:"yellow",label:"Lembrete",icon:"bell"}];
+
+// Icons8 Apple-style emoji helper
+function ei(name, size=20) {
+  return `<img src="https://img.icons8.com/emoji/96/${name}.png" width="${size}" height="${size}" style="vertical-align:middle;display:inline-block;" alt="${name}">`;
+}
+// Map common emoji chars to icons8 names for task emoji field
+const EMOJI_MAP = {
+  "💜":"purple-heart","💙":"blue-heart","💚":"green-heart","🟡":"yellow-circle",
+  "📡":"satellite-antenna","👶":"baby","✅":"check-mark-button","🎯":"direct-hit",
+  "📋":"clipboard","🗑️":"wastebasket","😊":"smiling-face-with-smiling-eyes",
+  "🔔":"bell","⭐":"star"
+};
+function emojiToIcon(ch, size=20) {
+  const name = EMOJI_MAP[ch] || "smiling-face-with-smiling-eyes";
+  return ei(name, size);
+}
+
+let state = {user:null,children:[],activeChildId:null,tasks:[]};
+let authMode = "login";
+let newTaskDays = [0,1,2,3,4,5,6];
+let onboardingDone = localStorage.getItem("utome_onboarding") === "true";
+
+setTimeout(() => {
+  document.getElementById("splash").style.display = "none";
+  if (!onboardingDone && !auth.currentUser) {
+    document.getElementById("onboarding").style.display = "block";
+  }
+}, 2000);
+
+function goOnboarding(step) {
+  document.querySelectorAll(".onboarding-screen").forEach((s,i) => {
+    s.classList.toggle("active", i === step);
+  });
+  document.querySelectorAll(".onboarding-nav button").forEach((b,i) => {
+    b.classList.toggle("active", i === step);
+  });
+}
+
+function skipOnboarding() {
+  localStorage.setItem("utome_onboarding", "true");
+  document.getElementById("onboarding").style.display = "none";
+  showAuth();
+}
+
+window.addEventListener("online", () => {
+  document.getElementById("offline-banner").style.display = "none";
+});
+
+window.addEventListener("offline", () => {
+  document.getElementById("offline-banner").style.display = "block";
+});
+
+if (!navigator.onLine) {
+  document.getElementById("offline-banner").style.display = "block";
+}
+
+function showAuth() {
+  document.getElementById("auth-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+}
+
+function showApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("greeting").textContent = "Olá, " + state.user.name;
+  loadChildren();
+}
+
+function setLoading(on) {
+  document.getElementById("auth-loading").style.display = on ? "block" : "none";
+  document.getElementById("auth-submit").disabled = on;
+}
+
+document.getElementById("auth-toggle").addEventListener("click", () => {
+  authMode = authMode === "login" ? "register" : "login";
+  document.getElementById("auth-title").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+  document.getElementById("auth-submit").textContent = authMode === "login" ? "Entrar" : "Cadastrar";
+  document.getElementById("auth-toggle").textContent = authMode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar";
+  document.getElementById("register-fields").style.display = authMode === "register" ? "block" : "none";
+  document.getElementById("auth-error").style.display = "none";
+});
+
+document.getElementById("auth-submit").addEventListener("click", async () => {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  const errBox = document.getElementById("auth-error");
+  errBox.style.display = "none";
+
+  if (!email || !password) {
+    errBox.textContent = "Preencha todos os campos";
+    errBox.style.display = "block";
+    return;
+  }
+
+  setLoading(true);
+  try {
+    if (authMode === "login") {
+      await auth.signInWithEmailAndPassword(email, password);
+    } else {
+      const name = document.getElementById("reg-name").value.trim();
+      if (!name) throw new Error("Nome obrigatório");
+      const res = await auth.createUserWithEmailAndPassword(email, password);
+      await db.collection("users").doc(res.user.uid).set({name,email});
+    }
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.style.display = "block";
+    setLoading(false);
+  }
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  auth.signOut();
+});
+
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    const doc = await db.collection("users").doc(user.uid).get();
+    state.user = {uid:user.uid,...doc.data()};
+    showApp();
+  } else {
+    state.user = null;
+    if (onboardingDone) showAuth();
+  }
+});
+
+async function loadChildren() {
+  const snap = await db.collection("children").where("userId","==",state.user.uid).get();
+  state.children = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderChildren();
+  if (state.children.length && !state.activeChildId) {
+    selectChild(state.children[0].id);
+  }
+}
+
+function renderChildren() {
+  const list = document.getElementById("children-list");
+  list.innerHTML = "";
+  if (state.children.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px;text-align:center;">Nenhuma criança</div>';
+    return;
+  }
+  state.children.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "child-item" + (c.id === state.activeChildId ? " active" : "");
+    div.innerHTML = `<div>${c.name}<small>ID: ${c.deviceId}</small></div>`;
+    div.addEventListener("click", () => selectChild(c.id));
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("add-child-btn").addEventListener("click", async () => {
+  const input = document.getElementById("new-child-name");
+  const name = input.value.trim();
+  if (!name) return;
+  const deviceId = Math.random().toString(16).slice(2,10);
+  const docRef = await db.collection("children").add({userId:state.user.uid,name,deviceId});
+  input.value = "";
+  state.children.push({id:docRef.id,name,deviceId,userId:state.user.uid});
+  renderChildren();
+  selectChild(docRef.id);
+});
+
+async function selectChild(childId) {
+  state.activeChildId = childId;
+  renderChildren();
+  const snap = await db.collection("tasks").where("childId","==",childId).get();
+  state.tasks = snap.docs.map(d => ({id:d.id,...d.data()}));
+  state.tasks.sort((a,b) => a.time.localeCompare(b.time));
+  renderRoutine();
+}
+
+function renderRoutine() {
+  const child = state.children.find(c => c.id === state.activeChildId);
+  const panel = document.getElementById("routine-panel");
+  if (!child) {
+    panel.innerHTML = '<div class="empty-state"><div class="icon">' + ei("direct-hit",64) + '</div><h3>Selecione uma criança</h3></div>';
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="routine-header">
+      <div><h2>Rotina de ${child.name}</h2><p>Configure horários, emojis e recompensas.</p></div>
+      <span class="device-id-pill">device: ${child.deviceId}</span>
+    </div>
+    <div id="day-toggle-wrap"></div>
+    <div class="task-list" id="task-list"></div>
+    <div class="new-task">
+      <div class="field"><label>Hora</label><input type="time" id="nt-time" value="08:00"></div>
+      <div class="field"><label>Tarefa</label><input type="text" id="nt-name" placeholder="Ex: Escovar dentes"></div>
+      <div class="field"><label>Emoji</label><input type="text" id="nt-emoji" value="😊" maxlength="2" placeholder="😊"></div>
+      <div class="field"><label>Estado</label><select id="nt-color">${COLORS.map(c => `<option value="${c.key}">${c.label}</option>`).join("")}</select></div>
+      <button class="btn" id="add-task-btn" style="height:40px;">Adicionar</button>
+    </div>
+  `;
+
+  renderTaskDayPicker();
+  renderTaskList();
+  document.getElementById("add-task-btn").addEventListener("click", addTask);
+}
+
+function renderTaskDayPicker() {
+  const wrap = document.createElement("div");
+  wrap.className = "day-toggle";
+  DAY_LABELS.forEach((label,idx) => {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.className = newTaskDays.includes(idx) ? "on" : "";
+    btn.addEventListener("click", () => {
+      if (newTaskDays.includes(idx)) {
+        newTaskDays = newTaskDays.filter(d => d !== idx);
+      } else {
+        newTaskDays.push(idx);
+        newTaskDays.sort((a,b) => a-b);
+      }
+      btn.className = newTaskDays.includes(idx) ? "on" : "";
+    });
+    wrap.appendChild(btn);
+  });
+  const label = document.createElement("p");
+  label.style.fontSize = "12px";
+  label.style.color = "var(--muted)";
+  label.style.marginBottom = "6px";
+  label.textContent = "Dias da nova tarefa:";
+  const dayToggleWrap = document.getElementById("day-toggle-wrap");
+  dayToggleWrap.appendChild(label);
+  dayToggleWrap.appendChild(wrap);
+}
+
+function renderTaskList() {
+  const list = document.getElementById("task-list");
+  if (!state.tasks.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:30px 10px;"><div class="icon">${ei("clipboard",64)}</div><h3>Nenhuma tarefa</h3><p>Adicione a primeira tarefa abaixo.</p></div>`;
+    return;
+  }
+  list.innerHTML = "";
+  state.tasks.forEach(t => {
+    const days = t.days.map(d => DAY_LABELS[d]).join(", ");
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.innerHTML = `<div class="task-heart ${t.color}">${emojiToIcon(t.emoji,18)}</div><div class="task-info"><div class="t-time">${t.time} · ${t.name}</div><div class="task-days">${days}</div></div><div class="task-actions"><button title="Remover" data-id="${t.id}">${ei("wastebasket",18)}</button></div>`;
+    card.querySelector("button").addEventListener("click", () => deleteTask(t.id));
+    list.appendChild(card);
+  });
+}
+
+async function addTask() {
+  const time = document.getElementById("nt-time").value;
+  const name = document.getElementById("nt-name").value.trim();
+  const emoji = document.getElementById("nt-emoji").value.trim() || "😊";
+  const color = document.getElementById("nt-color").value;
+
+  if (!time || !name) return;
+  if (!newTaskDays.length) {alert("Selecione ao menos um dia.");return;}
+
+  await db.collection("tasks").add({childId:state.activeChildId,time,name,emoji,color,days:newTaskDays,active:true});
+
+  document.getElementById("nt-time").value = "08:00";
+  document.getElementById("nt-name").value = "";
+  document.getElementById("nt-emoji").value = "😊";
+  document.getElementById("nt-color").value = "blue";
+  newTaskDays = [0,1,2,3,4,5,6];
+
+  await selectChild(state.activeChildId);
+}
+
+async function deleteTask(taskId) {
+  await db.collection("tasks").doc(taskId).delete();
+  state.tasks = state.tasks.filter(t => t.id !== taskId);
+  renderRoutine();
+}
+</script>
+</body>
+</html>
