@@ -1,0 +1,144 @@
+# UTOME · Changelog de Alterações
+
+> **Regra:** Antes de qualquer alteração no `utome-index.html`, este arquivo deve ser lido e uma nova entrada deve ser adicionada ANTES de aplicar as mudanças.
+
+---
+
+## [v1.0] — Arquivo original recebido
+**Data:** (antes do rastreamento)
+**Arquivo:** `utome-index.html`
+
+### ✅ Estado inicial
+- Tela de login simples com card centralizado
+- Autenticação email/senha via Firebase
+- CRUD de crianças e tarefas
+- Query de tarefas com `.where("childId").orderBy("time")` — **causa erro de índice no Firestore**
+- Emojis nativos do sistema operacional
+
+---
+
+## [v1.1] — Emojis Icons8 + Fix Firebase index
+**Data:** 2025 (sessão anterior)
+
+### ➕ Adicionado
+- Função helper `ei(name, size)` — gera `<img>` do Icons8 estilo Apple
+- Função `emojiToIcon(ch)` — converte emoji char para ícone Icons8
+- Mapa `EMOJI_MAP` com os emojis mais usados no app
+- Todos os emojis estáticos no HTML substituídos por `<img>` Icons8
+
+### ➖ Removido
+- Emojis nativos (💜, 👶, ✅, 🎯, 📋, 🗑️, 📡) do HTML e JS dinâmico
+- `.orderBy("time")` da query do Firestore (causava erro de índice composto)
+
+### 🔧 Corrigido
+- **FirebaseError: The query requires an index** — removido `orderBy` da query, ordenação feita client-side com `.sort((a,b) => a.time.localeCompare(b.time))`
+
+### ⚠️ Observação
+- A correção do `orderBy` foi aplicada no arquivo intermediário mas **não propagou corretamente para o output final** em uma das sessões — resultando na reincidência do erro
+
+---
+
+## [v1.2] — Split-screen auth + Social login
+**Data:** 2025 (sessão anterior)
+
+### ➕ Adicionado
+- Tela de auth reformulada com layout split-screen (esquerda: form, direita: visual)
+- Painel direito com gradiente laranja (`#FF8C00 → #E55A00`), blobs orgânicos e mascote SVG UTOME
+- Botão **Continuar com Google** — `GoogleAuthProvider` via Firebase popup
+- Botão **Continuar com Apple** — `OAuthProvider("apple.com")` via Firebase popup
+- Logo UTOME inline SVG no topo esquerdo (gradiente laranja + símbolo `|<`)
+- Subtítulo dinâmico que muda entre login e cadastro
+- Rodapé com texto de termos de serviço
+- Responsivo: painel direito oculto em mobile
+
+### ➖ Removido
+- Auth card centralizado simples (`.auth-card`)
+- Logo emoji no auth (💜)
+
+### ⚠️ Observações
+- Login com Apple requer configuração no Firebase Console + Apple Developer Account
+- COOP (Cross-Origin-Opener-Policy) pode bloquear o popup do Google/Apple em alguns ambientes — ver v1.3
+
+---
+
+## [v1.3] — Fix orderBy reincidente + sistema de logs
+**Data:** 2025-06-15
+
+### ➕ Adicionado
+- Este arquivo de changelog (`utome-changelog.md`) — rastreamento de todas as alterações
+- Regra: toda alteração futura deve ler este log antes de aplicar mudanças
+
+### 🔧 Corrigido
+- Confirmado que `selectChild()` no output **já está sem `orderBy`** — o erro persistente é de **cache do browser**
+- Solução para o usuário: forçar hard reload (`Ctrl+Shift+R` / `Cmd+Shift+R`) ou abrir em aba anônima
+
+### ⚠️ Novo erro identificado: COOP popup
+```
+Cross-Origin-Opener-Policy policy would block the window.closed call.
+```
+- Causa: o Firebase usa `signInWithPopup` que abre uma janela popup; ambientes com COOP estrito bloqueiam a comunicação entre janelas
+- Solução planejada: trocar `signInWithPopup` por `signInWithRedirect` nos botões Google e Apple
+- Status: **aplicando agora em v1.4**
+
+---
+
+## [v1.4] — Fix COOP popup → redirect + cache-bust
+**Data:** 2025-06-15
+
+### 🔧 Corrigido
+- `signInWithPopup` → `signInWithRedirect` + `getRedirectResult` nos botões Google e Apple
+  - Elimina o erro `Cross-Origin-Opener-Policy policy would block the window.closed call`
+- Adicionado `getRedirectResult` no boot do app para capturar o retorno do redirect
+
+### ➕ Adicionado
+- Handler `getRedirectResult` no início do script — necessário para fluxo de redirect
+
+### ➖ Removido
+- `signInWithPopup` (Google e Apple)
+
+---
+
+## [v1.5] — Security Rules + Deleção em cascata
+**Data:** 2025-06-15
+
+### ➕ Adicionado
+- **Firestore Security Rules** — bloco de regras comentado no HTML com instruções para colar no Firebase Console:
+  - `users`: só o próprio `uid` pode ler/escrever
+  - `children`: só o `userId` dono pode criar, ler, editar e deletar
+  - `tasks`: só o dono da `child` associada pode acessar (lookup cross-collection)
+- **Deleção em cascata** — ao deletar uma criança, todas as `tasks` com aquele `childId` são deletadas em batch antes de remover o doc da criança
+- **Botão de deletar criança** — adicionado botão "×" em cada item da lista de crianças
+- **Feedback visual** — loading state durante deleção em cascata
+
+### 🔧 Corrigido
+- Deleção de criança antes não removia as tasks associadas (dados órfãos no Firestore)
+
+### ⚠️ Observação
+- As Security Rules precisam ser coladas manualmente no Firebase Console → Firestore → Rules
+- O índice `tasks: childId + time` está sendo criado no Firebase Console pelo usuário (screenshot confirmado)
+- Com o índice pronto, o `orderBy` pode voltar para o Firebase — mantido client-side por ora até índice ficar "Ativo"
+
+---
+
+## [v1.6] — Fix name undefined + onSnapshot tempo real + campos extras na criança
+**Data:** 2025-06-15
+
+### ➕ Adicionado
+- **`onSnapshot` nas tasks** — listener em tempo real substitui `.get()` em `selectChild()`. Qualquer mudança no Firestore reflete instantaneamente na UI sem reload
+- **`taskUnsubscribe`** — variável global que guarda o unsubscribe do listener ativo; cancelado ao trocar de criança ou fazer logout, evitando memory leaks e listeners duplicados
+- **Campos extras na criança:** `avatar` (emoji, ex: 👧), `age` (número), `color` (cor hex, ex: #FF7A00)
+  - Salvos no Firestore ao criar criança
+  - Exibidos no card da criança na sidebar (avatar + nome + idade)
+  - Modal simples de criação de criança substituindo o input inline
+- **Avatar colorido na sidebar** — bolinha colorida com o emoji da criança antes do nome
+
+### 🔧 Corrigido
+- `state.user.name` podia ser `undefined` quando o doc do usuário não existia (ex: primeiro login Google/Apple sem doc criado). Agora usa fallback: `doc.data()?.name || user.displayName || "Usuário"`
+
+### ➖ Removido / Substituído
+- `.get()` em `selectChild()` → substituído por `onSnapshot()`
+- Input inline de nova criança → substituído por modal com campos avatar/idade/cor
+
+### ⚠️ Observações
+- `onSnapshot` consome uma conexão WebSocket persistente por criança ativa — é o comportamento esperado do Firestore
+- O `taskUnsubscribe` deve ser chamado no `auth.signOut()` para fechar o listener
