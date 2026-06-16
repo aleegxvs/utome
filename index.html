@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; base-uri 'self'; form-action 'self'; object-src 'none';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>UTOME · Painel da Família</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -25,6 +28,9 @@
   [data-theme="dark"] .btn-social{background:var(--card);border-color:var(--line);color:var(--ink);}
   [data-theme="dark"] .view-toggle{background:rgba(255,255,255,0.06);}
   [data-theme="dark"] .view-toggle button.active{background:rgba(255,255,255,0.12);}
+  [data-theme="dark"] .emoji-grid button{background:var(--bg);color:var(--ink);}
+  [data-theme="dark"] .day-toggle button{background:var(--bg);}
+  [data-theme="dark"] .add-task-floating:hover{background:rgba(255,122,0,0.12);}
   [data-theme="dark"] .skeleton{background:linear-gradient(90deg,#2a283d 25%,#322f4a 50%,#2a283d 75%);background-size:200% 100%;}
   
   #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px;}
@@ -211,7 +217,7 @@
   /* G: Modal Nova Tarefa */
   #modal-task{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2500;align-items:center;justify-content:center;padding:20px;}
   #modal-task.open{display:flex;}
-  .modal-task-box{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+  .modal-task-box{background:var(--card);border-radius:20px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
   .modal-task-box h2{font-size:18px;margin-bottom:20px;font-family:'Quicksand',sans-serif;}
   .modal-task-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px;}
@@ -219,10 +225,10 @@
   .emoji-grid button:hover{border-color:var(--line);transform:scale(1.1);}
   .emoji-grid button.selected{border-color:var(--orange);background:#FFF0E0;}
   .modal-task-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
-  .modal-task-days button{flex:1;min-width:36px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .12s;font-family:inherit;}
+  .modal-task-days button{flex:1;min-width:36px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .12s;font-family:inherit;}
   .modal-task-days button.on{background:var(--orange);color:#fff;border-color:var(--orange);}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
-  .btn-modal-cancel{flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;}
+  .btn-modal-cancel{flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);}
 
   #app .btn{background:linear-gradient(135deg,#FF8C00,#FF6000);box-shadow:0 4px 14px rgba(255,110,0,0.30);}
   
@@ -237,12 +243,12 @@
   #toast-undo{background:none;border:none;color:var(--orange);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;padding:0;}
   #modal-confirm{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:3000;align-items:center;justify-content:center;}
   #modal-confirm.open{display:flex;}
-  .modal-confirm-box{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .modal-confirm-box{background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
   .modal-confirm-box h3{font-family:'Quicksand',sans-serif;font-size:18px;margin-bottom:8px;}
   .modal-confirm-box p{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
   .modal-confirm-actions{display:flex;gap:10px;}
   .btn-danger{flex:1;padding:12px;border:none;border-radius:12px;background:var(--red);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:'Quicksand',sans-serif;}
-  .btn-cancel-modal{flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);}
+  .btn-cancel-modal{flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);}
 
   /* ── Profile Panel ── */
   #modal-profile{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2500;align-items:center;justify-content:center;padding:20px;}
@@ -261,6 +267,18 @@
   .profile-body{padding:8px 28px 28px;}
   .profile-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px;margin-top:18px;}
   .profile-section-title:first-child{margin-top:0;}
+  .mfa-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;margin-bottom:12px;}
+  .mfa-status.off{background:#FFF0F0;color:#C0392B;}
+  .mfa-status.on{background:#E8F8F0;color:#1E8449;}
+  .mfa-actions{display:flex;flex-direction:column;gap:10px;}
+  .btn-mfa{padding:11px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn-mfa:hover{border-color:var(--orange);}
+  .btn-mfa.danger{border-color:#FADADA;color:#C0392B;}
+  #modal-mfa{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:3000;align-items:center;justify-content:center;padding:20px;}
+  #modal-mfa.open{display:flex;}
+  .mfa-box{background:var(--card);border-radius:20px;padding:28px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .mfa-box h3{font-size:18px;margin-bottom:8px;}
+  .mfa-box p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
   .theme-opts{display:flex;gap:8px;}
   .theme-opt{flex:1;padding:10px 8px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .15s,background .15s;}
   .theme-opt:hover{border-color:var(--orange);}
@@ -387,7 +405,7 @@
     </div>
     <div class="field">
       <label>Senha</label>
-      <input type="password" id="auth-password" placeholder="••••••••">
+      <input type="password" id="auth-password" placeholder="••••••••" minlength="8" autocomplete="current-password">
     </div>
     <button class="btn" id="auth-submit">Continuar</button>
 
@@ -428,7 +446,7 @@
         </defs>
       </svg>
     </div>
-    <div class="auth-version">v1.8</div>
+    <div class="auth-version">v2.2</div>
   </div>
 </div>
 
@@ -448,7 +466,7 @@
           <label class="btn-upload-child">
             <span class="ei" style="margin-right:5px;"><img src="https://img.icons8.com/ios-filled/14/2B2A3D/upload.png" id="nc-upload-icon" width="14" height="14"></span>
             Enviar foto
-            <input type="file" id="nc-photo-upload" accept="image/*">
+            <input type="file" id="nc-photo-upload" accept="image/jpeg,image/png,image/webp">
           </label>
           <button class="btn-clear-child-photo" id="nc-clear-photo" style="display:none;">Remover foto</button>
           <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
@@ -526,7 +544,7 @@
         <div class="avatar-preview" id="profile-avatar-preview"></div>
         <label class="avatar-upload-btn" title="Trocar foto">
           <span class="ei"><img src="https://img.icons8.com/ios-filled/14/2B2A3D/camera.png" id="profile-cam-icon" width="14" height="14"></span>
-          <input type="file" id="profile-photo-input" accept="image/*" style="display:none;">
+          <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
         </label>
       </div>
     </div>
@@ -539,6 +557,16 @@
       <div class="field">
         <label>Como o UTOME te chama</label>
         <input type="text" id="profile-nick" placeholder="Ex: Mamãe, João, Pai">
+      </div>
+      <div class="profile-section-title">Segurança da conta</div>
+      <div id="mfa-status-badge" class="mfa-status off">2FA: desativado</div>
+      <div class="mfa-actions">
+        <div class="field" id="mfa-enroll-fields" style="margin-bottom:0;">
+          <label>Telefone (SMS para 2FA)</label>
+          <input type="tel" id="mfa-phone" placeholder="+55 11 99999-9999">
+        </div>
+        <button type="button" class="btn-mfa" id="mfa-enable-btn">Ativar verificação em 2 etapas</button>
+        <button type="button" class="btn-mfa danger" id="mfa-disable-btn" style="display:none;">Desativar 2FA</button>
       </div>
       <div class="profile-section-title">Aparência</div>
       <div class="theme-opts">
@@ -579,6 +607,23 @@
     </div>
   </div>
 </div>
+
+<!-- Modal MFA (login + enrollment) -->
+<div id="modal-mfa">
+  <div class="mfa-box">
+    <h3 id="mfa-modal-title">Verificação em 2 etapas</h3>
+    <p id="mfa-modal-desc">Digite o código SMS enviado ao seu telefone.</p>
+    <div class="field">
+      <label>Código de verificação</label>
+      <input type="text" id="mfa-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button type="button" class="btn-mfa" id="mfa-cancel" style="flex:1;">Cancelar</button>
+      <button type="button" class="btn" id="mfa-confirm" style="flex:1;">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div id="recaptcha-mfa" style="display:none;"></div>
 
 <div id="app">
   <div class="topbar">
@@ -629,11 +674,21 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/dompurify@3.0.3/dist/purify.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 
 <script>
+// ── HTTPS Enforcement (exceto localhost) ──
+(function enforceHTTPS() {
+  const h = location.hostname;
+  if (location.protocol === "http:" && h !== "localhost" && h !== "127.0.0.1" && !h.endsWith(".local")) {
+    location.replace(location.href.replace(/^http:/, "https:"));
+  }
+})();
+
 const firebaseConfig = {
   apiKey: "AIzaSyBmaTDtHrmPe4q8Hk4Ko5UCa3qKWfWnqAg",
   authDomain: "tomi-ia.firebaseapp.com",
@@ -645,8 +700,327 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// App Check (reCAPTCHA v3) - Previne bot/scraping
+// Requer chave registrada em: https://console.firebase.google.com → App Check
+try {
+  const RECAPTCHA_KEY = 'SUA_CHAVE_RECAPTCHA_AQUI';
+  if (RECAPTCHA_KEY && RECAPTCHA_KEY !== 'SUA_CHAVE_RECAPTCHA_AQUI') {
+    const appCheck = firebase.appCheck();
+    appCheck.activate(RECAPTCHA_KEY, true);
+  } else {
+    console.info('[UTOME] App Check desativado: configure RECAPTCHA_KEY para ativar proteção total.');
+  }
+} catch(e) { console.warn('[UTOME] App Check não disponível:', e.message); }
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// ══════════════════════════════════════════════════════════
+// UTOME_SEC — Camada de segurança centralizada
+// ══════════════════════════════════════════════════════════
+const UTOME_SEC = {
+  LIMITS: {
+    MAX_CHILDREN: 10,
+    MAX_TASKS_PER_CHILD: 50,
+    MAX_UPLOAD_BYTES: 500 * 1024,
+    ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp"],
+    MAX_NAME: 50,
+    MAX_NICK: 30,
+    MIN_PASSWORD: 8
+  },
+  RATE: {
+    login: { max: 5, windowMs: 15 * 60 * 1000 },
+    register: { max: 3, windowMs: 60 * 60 * 1000 },
+    createChild: { max: 10, windowMs: 60 * 60 * 1000 },
+    createTask: { max: 30, windowMs: 60 * 60 * 1000 },
+    upload: { max: 10, windowMs: 10 * 60 * 1000 }
+  },
+  _anomaly: { actions: [], loginFailures: 0, uploadRejections: 0 }
+};
+
+// Session Management + anti-fixação
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+
+function esc(str) {
+  const d = document.createElement("div");
+  d.textContent = str ?? "";
+  return d.innerHTML;
+}
+
+function sanitizeText(value, maxLen = 50) {
+  return DOMPurify.sanitize(String(value || "").trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).slice(0, maxLen);
+}
+
+function validateText(value, { min = 1, max = 50, label = "Campo" } = {}) {
+  const v = sanitizeText(value, max);
+  if (v.length < min) return { ok: false, error: `${label} é obrigatório`, value: v };
+  if (v.length > max) return { ok: false, error: `${label} muito longo`, value: v };
+  return { ok: true, value: v };
+}
+
+function validateEmail(raw) {
+  const v = sanitizeText(raw, 120);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { ok: false, error: "E-mail inválido" };
+  return { ok: true, value: v };
+}
+
+function validatePassword(pw) {
+  if (!pw || pw.length < UTOME_SEC.LIMITS.MIN_PASSWORD) {
+    return { ok: false, error: `Senha deve ter pelo menos ${UTOME_SEC.LIMITS.MIN_PASSWORD} caracteres` };
+  }
+  return { ok: true };
+}
+
+function validateImageFile(file) {
+  if (!file) return { ok: false, error: "Nenhum arquivo selecionado" };
+  if (!UTOME_SEC.LIMITS.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { ok: false, error: "Envie JPG, PNG ou WEBP." };
+  }
+  if (file.size > UTOME_SEC.LIMITS.MAX_UPLOAD_BYTES) {
+    return { ok: false, error: "Imagem deve ter no máximo 500KB." };
+  }
+  return { ok: true };
+}
+
+function validateBase64Image(dataUrl) {
+  if (!dataUrl || !dataUrl.startsWith("data:image/")) return { ok: false, error: "Formato de imagem inválido" };
+  const approxBytes = Math.ceil((dataUrl.length - dataUrl.indexOf(",") - 1) * 0.75);
+  if (approxBytes > UTOME_SEC.LIMITS.MAX_UPLOAD_BYTES) return { ok: false, error: "Imagem muito grande (máx. 500KB)." };
+  return { ok: true };
+}
+
+function getAuthErrorMsg() {
+  return "Credenciais inválidas ou erro de autenticação.";
+}
+
+function checkRateLimit(key) {
+  const cfg = UTOME_SEC.RATE[key];
+  if (!cfg) return { allowed: true };
+  const store = JSON.parse(localStorage.getItem("utome_rate") || "{}");
+  const now = Date.now();
+  const entry = store[key] || { attempts: [], blockedUntil: 0 };
+  if (entry.blockedUntil > now) return { allowed: false, retryAfter: entry.blockedUntil - now };
+  entry.attempts = entry.attempts.filter(t => now - t < cfg.windowMs);
+  if (entry.attempts.length >= cfg.max) {
+    entry.blockedUntil = now + cfg.windowMs;
+    store[key] = entry;
+    localStorage.setItem("utome_rate", JSON.stringify(store));
+    logAudit("RATE_LIMIT_HIT", { key }, "WARNING");
+    return { allowed: false };
+  }
+  entry.attempts.push(now);
+  store[key] = entry;
+  localStorage.setItem("utome_rate", JSON.stringify(store));
+  return { allowed: true };
+}
+
+function recordAction(action) {
+  const now = Date.now();
+  UTOME_SEC._anomaly.actions.push({ action, ts: now });
+  UTOME_SEC._anomaly.actions = UTOME_SEC._anomaly.actions.filter(a => now - a.ts < 60000);
+  if (UTOME_SEC._anomaly.actions.length > 40) {
+    logAudit("ANOMALY_HIGH_ACTIVITY", { count: UTOME_SEC._anomaly.actions.length, action }, "CRITICAL");
+  }
+}
+
+function recordLoginFailure() {
+  UTOME_SEC._anomaly.loginFailures++;
+  if (UTOME_SEC._anomaly.loginFailures >= 5) {
+    logAudit("ANOMALY_LOGIN_FAILURES", { count: UTOME_SEC._anomaly.loginFailures }, "WARNING");
+    UTOME_SEC._anomaly.loginFailures = 0;
+  }
+}
+
+function recordUploadRejection() {
+  UTOME_SEC._anomaly.uploadRejections++;
+  if (UTOME_SEC._anomaly.uploadRejections >= 3) {
+    logAudit("ANOMALY_UPLOAD_SPIKE", { count: UTOME_SEC._anomaly.uploadRejections }, "WARNING");
+    UTOME_SEC._anomaly.uploadRejections = 0;
+  }
+}
+
+function enforceResourceLimit(type, currentCount) {
+  if (type === "children" && currentCount >= UTOME_SEC.LIMITS.MAX_CHILDREN) {
+    return { ok: false, error: `Limite de ${UTOME_SEC.LIMITS.MAX_CHILDREN} crianças atingido.` };
+  }
+  if (type === "tasks" && currentCount >= UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD) {
+    return { ok: false, error: `Limite de ${UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD} tarefas por criança.` };
+  }
+  return { ok: true };
+}
+
+async function initSessionSecurity(user) {
+  const sessionId = crypto.randomUUID();
+  sessionStorage.setItem("utome_session_id", sessionId);
+  try { await user.getIdToken(true); } catch (_) {}
+  try {
+    await db.collection("users").doc(user.uid).update({
+      lastSessionId: sessionId,
+      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (_) {}
+  logAudit("SESSION_INIT", { sessionId });
+}
+
+function clearSessionSecurity() {
+  sessionStorage.removeItem("utome_session_id");
+  UTOME_SEC._anomaly = { actions: [], loginFailures: 0, uploadRejections: 0 };
+}
+
+async function withGuard(btn, rateKey, actionName, fn) {
+  const rl = checkRateLimit(rateKey);
+  if (!rl.allowed) {
+    alert("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
+    return;
+  }
+  recordAction(actionName);
+  if (btn) btn.disabled = true;
+  try { return await fn(); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+// Anti-scraping: detecta automação headless
+if (navigator.webdriver) {
+  console.warn("[UTOME] Ambiente automatizado detectado.");
+  setTimeout(() => logAudit("BOT_SUSPECTED", { webdriver: true }, "WARNING"), 3000);
+}
+
+// Audit Logging
+async function logAudit(action, details = {}, severity = "INFO") {
+  try {
+    if (!auth.currentUser) return;
+    await db.collection(`users/${auth.currentUser.uid}/audit_logs`).add({
+      action, details, severity,
+      sessionId: sessionStorage.getItem("utome_session_id") || null,
+      actionCount1m: UTOME_SEC._anomaly.actions.length,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent
+    });
+  } catch (_) { console.warn("Audit log falhou"); }
+}
+
+// ── MFA (Firebase Phone 2FA) ──
+let mfaResolver = null;
+let mfaVerificationId = null;
+let mfaRecaptchaVerifier = null;
+
+function getMfaRecaptcha() {
+  if (!mfaRecaptchaVerifier) {
+    mfaRecaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-mfa", { size: "invisible" }, auth);
+  }
+  return mfaRecaptchaVerifier;
+}
+
+function openMfaModal(title, desc) {
+  document.getElementById("mfa-modal-title").textContent = title;
+  document.getElementById("mfa-modal-desc").textContent = desc;
+  document.getElementById("mfa-code").value = "";
+  document.getElementById("modal-mfa").classList.add("open");
+}
+
+function closeMfaModal() {
+  document.getElementById("modal-mfa").classList.remove("open");
+  mfaResolver = null;
+  mfaVerificationId = null;
+}
+
+async function handleMfaSignIn(resolver) {
+  mfaResolver = resolver;
+  const hint = resolver.hints[0];
+  const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+  mfaVerificationId = await phoneAuthProvider.verifyPhoneNumber(
+    { multiFactorHint: hint, session: resolver.session },
+    getMfaRecaptcha()
+  );
+  openMfaModal("Verificação em 2 etapas", "Digite o código SMS enviado ao seu telefone cadastrado.");
+}
+
+async function updateMfaUI() {
+  const user = auth.currentUser;
+  const badge = document.getElementById("mfa-status-badge");
+  const enableBtn = document.getElementById("mfa-enable-btn");
+  const disableBtn = document.getElementById("mfa-disable-btn");
+  const enrollFields = document.getElementById("mfa-enroll-fields");
+  if (!user || !badge) return;
+  const enrolled = firebase.auth().multiFactor(user).enrolledFactors.length > 0;
+  badge.textContent = enrolled ? "2FA: ativado" : "2FA: desativado";
+  badge.className = "mfa-status " + (enrolled ? "on" : "off");
+  disableBtn.style.display = enrolled ? "block" : "none";
+  enrollFields.style.display = enrolled ? "none" : "block";
+  enableBtn.style.display = enrolled ? "none" : "block";
+}
+
+document.getElementById("mfa-cancel").addEventListener("click", () => {
+  closeMfaModal();
+  setLoading(false);
+});
+
+document.getElementById("mfa-confirm").addEventListener("click", async () => {
+  const code = document.getElementById("mfa-code").value.trim();
+  const btn = document.getElementById("mfa-confirm");
+  if (!code || code.length < 6) { alert("Digite o código de 6 dígitos."); return; }
+  btn.disabled = true;
+  try {
+    const cred = firebase.auth.PhoneAuthProvider.credential(mfaVerificationId, code);
+    if (mfaResolver) {
+      const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+      await mfaResolver.resolveSignIn(assertion);
+      logAudit("MFA_LOGIN_SUCCESS", {});
+      closeMfaModal();
+    } else {
+      const user = auth.currentUser;
+      const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+      await firebase.auth().multiFactor(user).enroll(assertion, "Telefone SMS");
+      logAudit("MFA_ENROLL_SUCCESS", {});
+      closeMfaModal();
+      updateMfaUI();
+      showToast("2FA ativado com sucesso");
+    }
+  } catch (e) {
+    logAudit("MFA_FAILED", {}, "WARNING");
+    alert(getAuthErrorMsg());
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("mfa-enable-btn").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const phone = document.getElementById("mfa-phone").value.trim();
+  if (!phone || phone.length < 10) { alert("Informe um telefone válido com DDI (ex: +5511999999999)."); return; }
+  await withGuard(document.getElementById("mfa-enable-btn"), "login", "MFA_ENROLL", async () => {
+    try {
+      const session = await firebase.auth().multiFactor(user).getSession();
+      const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+      mfaVerificationId = await phoneAuthProvider.verifyPhoneNumber({ phoneNumber: phone, session }, getMfaRecaptcha());
+      mfaResolver = null;
+      openMfaModal("Ativar 2FA", "Digite o código SMS para confirmar seu telefone.");
+      logAudit("MFA_ENROLL_STARTED", {});
+    } catch (e) {
+      logAudit("MFA_ENROLL_FAILED", {}, "WARNING");
+      alert("Não foi possível iniciar o 2FA. Verifique o telefone e se o MFA está habilitado no Firebase Console.");
+    }
+  });
+});
+
+document.getElementById("mfa-disable-btn").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const factors = firebase.auth().multiFactor(user).enrolledFactors;
+  if (!factors.length) return;
+  const confirmed = await showConfirmModal("Desativar 2FA?", "Sua conta ficará menos protegida.");
+  if (!confirmed) return;
+  try {
+    await firebase.auth().multiFactor(user).unenroll(factors[0]);
+    logAudit("MFA_DISABLED", {});
+    updateMfaUI();
+    showToast("2FA desativado");
+  } catch (e) {
+    alert("Não foi possível desativar o 2FA.");
+  }
+});
 
 const DAY_LABELS = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const COLORS = [
@@ -703,11 +1077,18 @@ function getTodayIdx() {
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
-setTimeout(() => {
+// Controla a visibilidade do splash após Firebase resolver
+let firebaseResolved = false;
+let splashTimerDone = false;
+
+function tryHideSplash() {
+  if (!firebaseResolved || !splashTimerDone) return;
   document.getElementById("splash").style.display = "none";
-  if (!onboardingDone && !auth.currentUser) {
-    document.getElementById("onboarding").style.display = "block";
-  }
+}
+
+setTimeout(() => {
+  splashTimerDone = true;
+  tryHideSplash();
 }, 2000);
 
 function goOnboarding(step) {
@@ -792,51 +1173,80 @@ auth.getRedirectResult().then(async (result) => {
   }
 }).catch((e) => {
   const errBox = document.getElementById("auth-error");
-  if (errBox) { errBox.textContent = e.message; errBox.style.display = "block"; }
+  if (errBox) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
 });
 
 document.getElementById("btn-google").addEventListener("click", async () => {
   const errBox = document.getElementById("auth-error");
   errBox.style.display = "none";
+  if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
+  recordAction("LOGIN_GOOGLE");
+  document.getElementById("btn-google").disabled = true;
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     await auth.signInWithRedirect(provider);
-  } catch(e) { errBox.textContent = e.message; errBox.style.display = "block"; }
+  } catch(e) { document.getElementById("btn-google").disabled = false; errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
 });
 
 document.getElementById("btn-apple").addEventListener("click", async () => {
   const errBox = document.getElementById("auth-error");
   errBox.style.display = "none";
+  if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
+  recordAction("LOGIN_APPLE");
+  document.getElementById("btn-apple").disabled = true;
   try {
     const provider = new firebase.auth.OAuthProvider("apple.com");
     await auth.signInWithRedirect(provider);
-  } catch(e) { errBox.textContent = e.message; errBox.style.display = "block"; }
+  } catch(e) { document.getElementById("btn-apple").disabled = false; errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
 });
 
 document.getElementById("auth-submit").addEventListener("click", async () => {
-  const email = document.getElementById("auth-email").value.trim();
-  const password = document.getElementById("auth-password").value;
   const errBox = document.getElementById("auth-error");
   errBox.style.display = "none";
-  if (!email || !password) { errBox.textContent = "Preencha todos os campos"; errBox.style.display = "block"; return; }
+  const emailVal = validateEmail(document.getElementById("auth-email").value);
+  const password = document.getElementById("auth-password").value;
+  if (!emailVal.ok) { errBox.textContent = emailVal.error; errBox.style.display = "block"; return; }
+  if (!password) { errBox.textContent = "Preencha todos os campos"; errBox.style.display = "block"; return; }
+  const rateKey = authMode === "login" ? "login" : "register";
+  const rl = checkRateLimit(rateKey);
+  if (!rl.allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
   setLoading(true);
+  recordAction(authMode === "login" ? "LOGIN_ATTEMPT" : "REGISTER_ATTEMPT");
   try {
     if (authMode === "login") {
-      await auth.signInWithEmailAndPassword(email, password);
+      const pwVal = validatePassword(password);
+      if (!pwVal.ok) throw new Error("invalid");
+      await auth.signInWithEmailAndPassword(emailVal.value, password);
+      logAudit("LOGIN_SUCCESS", { method: "email" });
     } else {
-      const name = document.getElementById("reg-name").value.trim();
-      if (!name) throw new Error("Nome obrigatório");
-      const res = await auth.createUserWithEmailAndPassword(email, password);
-      await db.collection("users").doc(res.user.uid).set({name,email});
+      const nameVal = validateText(document.getElementById("reg-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+      const pwVal = validatePassword(password);
+      if (!nameVal.ok || !pwVal.ok) throw new Error("invalid");
+      const res = await auth.createUserWithEmailAndPassword(emailVal.value, password);
+      await db.collection("users").doc(res.user.uid).set({ name: nameVal.value, email: emailVal.value });
+      logAudit("REGISTER_SUCCESS", { method: "email" });
     }
   } catch (e) {
-    errBox.textContent = e.message;
+    if (e.code === "auth/multi-factor-auth-required") {
+      try {
+        await handleMfaSignIn(e.resolver);
+        return;
+      } catch (_) {
+        recordLoginFailure();
+      }
+    } else {
+      recordLoginFailure();
+    }
+    logAudit("LOGIN_FAILED", { method: "email" }, "WARNING");
+    errBox.textContent = getAuthErrorMsg();
     errBox.style.display = "block";
     setLoading(false);
   }
 });
 
 document.getElementById("logout-btn").addEventListener("click", () => {
+  logAudit("LOGOUT", {});
+  clearSessionSecurity();
   if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
   auth.signOut();
 });
@@ -888,6 +1298,7 @@ function openProfileModal() {
   });
   
   modal.classList.add("open");
+  updateMfaUI();
 }
 
 document.getElementById("profile-close").addEventListener("click", () => {
@@ -904,6 +1315,17 @@ document.getElementById("modal-profile").addEventListener("click", (e) => {
 document.getElementById("profile-photo-input").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  const rl = checkRateLimit("upload");
+  if (!rl.allowed) { alert("Muitos uploads. Aguarde alguns minutos."); e.target.value = ""; return; }
+  const check = validateImageFile(file);
+  if (!check.ok) {
+    alert(check.error);
+    logAudit("UPLOAD_REJECTED", { type: file.type, size: file.size }, "WARNING");
+    recordUploadRejection();
+    e.target.value = "";
+    return;
+  }
+  recordAction("UPLOAD_PROFILE");
   const reader = new FileReader();
   reader.onload = (ev) => {
     profilePhotoDataUrl = ev.target.result;
@@ -923,21 +1345,24 @@ document.querySelectorAll(".theme-opt").forEach(btn => {
 });
 
 document.getElementById("profile-save").addEventListener("click", async () => {
-  const name = document.getElementById("profile-name").value.trim();
-  const nick = document.getElementById("profile-nick").value.trim();
-  if (!name) { document.getElementById("profile-name").focus(); return; }
-  
-  const updates = {name, nick};
-  if (profilePhotoDataUrl !== state.user.photoURL) {
-    updates.photoURL = profilePhotoDataUrl;
-  }
-  
-  await db.collection("users").doc(state.user.uid).update(updates);
-  state.user = {...state.user, ...updates};
-  
-  document.getElementById("modal-profile").classList.remove("open");
-  showApp(); // refresh greeting and avatar
-  showToast("Perfil atualizado");
+  await withGuard(document.getElementById("profile-save"), "login", "UPDATE_PROFILE", async () => {
+    const nameVal = validateText(document.getElementById("profile-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+    const nickVal = validateText(document.getElementById("profile-nick").value, { min: 0, max: UTOME_SEC.LIMITS.MAX_NICK, label: "Nick" });
+    if (!nameVal.ok) { alert(nameVal.error); return; }
+    if (!nickVal.ok) { alert(nickVal.error); return; }
+    if (profilePhotoDataUrl && profilePhotoDataUrl !== state.user.photoURL) {
+      const imgCheck = validateBase64Image(profilePhotoDataUrl);
+      if (!imgCheck.ok) { alert(imgCheck.error); return; }
+    }
+    const updates = { name: nameVal.value, nick: nickVal.value };
+    if (profilePhotoDataUrl !== state.user.photoURL) updates.photoURL = profilePhotoDataUrl;
+    await db.collection("users").doc(state.user.uid).update(updates);
+    state.user = { ...state.user, ...updates };
+    document.getElementById("modal-profile").classList.remove("open");
+    showApp();
+    showToast("Perfil atualizado");
+    logAudit("UPDATE_PROFILE", {});
+  });
 });
 
 auth.onAuthStateChanged(async (user) => {
@@ -946,14 +1371,26 @@ auth.onAuthStateChanged(async (user) => {
     const data = doc.exists ? doc.data() : {};
     const name = data.name || user.displayName || "Usuário";
     if (!doc.exists) {
-      await db.collection("users").doc(user.uid).set({name, email: user.email || ""});
+      await db.collection("users").doc(user.uid).set({ name, email: user.email || "" });
     }
-    state.user = {uid: user.uid, name, email: user.email || "", nick: data.nick || "", photoURL: data.photoURL || null, ...data};
+    state.user = { uid: user.uid, name, email: user.email || "", nick: data.nick || "", photoURL: data.photoURL || null, ...data };
+    if (!sessionStorage.getItem("utome_session_id")) await initSessionSecurity(user);
+    closeMfaModal();
+    setLoading(false);
+    firebaseResolved = true;
+    tryHideSplash();
     showApp();
   } else {
     state.user = null;
+    clearSessionSecurity();
     if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
-    if (onboardingDone) showAuth();
+    firebaseResolved = true;
+    tryHideSplash();
+    if (!onboardingDone) {
+      document.getElementById("onboarding").style.display = "block";
+    } else {
+      showAuth();
+    }
   }
 });
 
@@ -993,6 +1430,12 @@ async function loadChildren() {
   const snap = await db.collection("children").where("userId","==",state.user.uid).get();
   state.children = snap.docs.map(d => ({id:d.id,...d.data()}));
   renderChildren();
+  const addBtn = document.getElementById("add-child-btn");
+  if (addBtn) {
+    const atLimit = state.children.length >= UTOME_SEC.LIMITS.MAX_CHILDREN;
+    addBtn.disabled = atLimit;
+    addBtn.title = atLimit ? `Limite de ${UTOME_SEC.LIMITS.MAX_CHILDREN} crianças` : "";
+  }
   if (state.children.length && !state.activeChildId) {
     selectChild(state.children[0].id);
   }
@@ -1017,10 +1460,10 @@ function renderChildren() {
     div.innerHTML = `
       <div class="child-avatar" style="background:${childColor}22;border:2px solid ${childColor};">${avatarContent}</div>
       <div class="child-info child-select">
-        <div class="child-name">${c.name}</div>
-        <small>${ageLabel}</small>
+        <div class="child-name">${esc(c.name)}</div>
+        <small>${esc(ageLabel)}</small>
       </div>
-      <button class="child-delete-btn" title="Remover criança" data-id="${c.id}" data-name="${c.name}">×</button>
+      <button class="child-delete-btn" title="Remover criança" data-id="${esc(c.id)}" data-name="${esc(c.name)}">×</button>
     `;
     div.querySelector(".child-select").addEventListener("click", () => selectChild(c.id));
     div.querySelector(".child-delete-btn").addEventListener("click", (e) => {
@@ -1034,7 +1477,7 @@ function renderChildren() {
 async function deleteChild(childId, childName) {
   const confirmed = await showConfirmModal(
     `Remover "${childName}"?`,
-    `Todas as tarefas desta criança também serão deletadas. Esta ação não pode ser desfeita.`
+    "Todas as tarefas desta criança também serão deletadas. Esta ação não pode ser desfeita."
   );
   if (!confirmed) return;
   const taskSnap = await db.collection("tasks").where("childId", "==", childId).get();
@@ -1042,6 +1485,7 @@ async function deleteChild(childId, childName) {
   taskSnap.docs.forEach(doc => batch.delete(doc.ref));
   batch.delete(db.collection("children").doc(childId));
   await batch.commit();
+  logAudit("DELETE_CHILD", { childId });
   state.children = state.children.filter(c => c.id !== childId);
   if (state.activeChildId === childId) {
     state.activeChildId = null;
@@ -1085,6 +1529,17 @@ document.getElementById("add-child-btn").addEventListener("click", () => {
 document.getElementById("nc-photo-upload").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  const rl = checkRateLimit("upload");
+  if (!rl.allowed) { alert("Muitos uploads. Aguarde alguns minutos."); e.target.value = ""; return; }
+  const check = validateImageFile(file);
+  if (!check.ok) {
+    alert(check.error);
+    logAudit("UPLOAD_REJECTED", { type: file.type, size: file.size }, "WARNING");
+    recordUploadRejection();
+    e.target.value = "";
+    return;
+  }
+  recordAction("UPLOAD_CHILD");
   const reader = new FileReader();
   reader.onload = (ev) => {
     childPhotoDataUrl = ev.target.result;
@@ -1111,21 +1566,31 @@ document.getElementById("nc-cancel").addEventListener("click", () => {
 });
 
 document.getElementById("nc-save").addEventListener("click", async () => {
-  const name   = document.getElementById("nc-name").value.trim();
-  const avatar = document.getElementById("nc-avatar").value.trim() || "🧒";
-  const age    = parseInt(document.getElementById("nc-age").value) || null;
-  const color  = selectedColor;
-  const photoURL = childPhotoDataUrl || null;
-  if (!name) { document.getElementById("nc-name").focus(); return; }
-  const deviceId = Math.random().toString(16).slice(2, 10);
-  const docRef = await db.collection("children").add({
-    userId: state.user.uid, name, avatar, age, color, deviceId, photoURL
+  await withGuard(document.getElementById("nc-save"), "createChild", "CREATE_CHILD", async () => {
+    const limit = enforceResourceLimit("children", state.children.length);
+    if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "children" }, "WARNING"); return; }
+    const nameVal = validateText(document.getElementById("nc-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+    const avatar = sanitizeText(document.getElementById("nc-avatar").value.trim() || "🧒", 4);
+    const age = parseInt(document.getElementById("nc-age").value, 10) || null;
+    if (age !== null && (age < 0 || age > 18)) { alert("Idade inválida (0–18)."); return; }
+    const color = selectedColor;
+    const photoURL = childPhotoDataUrl || null;
+    if (!nameVal.ok) { alert(nameVal.error); return; }
+    if (photoURL) {
+      const imgCheck = validateBase64Image(photoURL);
+      if (!imgCheck.ok) { alert(imgCheck.error); return; }
+    }
+    const deviceId = Math.random().toString(16).slice(2, 10);
+    const docRef = await db.collection("children").add({
+      userId: state.user.uid, name: nameVal.value, avatar, age, color, deviceId, photoURL
+    });
+    const child = { id: docRef.id, userId: state.user.uid, name: nameVal.value, avatar, age, color, deviceId, photoURL };
+    state.children.push(child);
+    logAudit("CREATE_CHILD", { childId: child.id });
+    document.getElementById("modal-child").style.display = "none";
+    renderChildren();
+    selectChild(docRef.id);
   });
-  const child = {id: docRef.id, userId: state.user.uid, name, avatar, age, color, deviceId, photoURL};
-  state.children.push(child);
-  document.getElementById("modal-child").style.display = "none";
-  renderChildren();
-  selectChild(docRef.id);
 });
 
 // G: Modal Nova Tarefa — setup emoji grid e days
@@ -1218,7 +1683,7 @@ function renderRoutine(prevIds, newIds) {
   panel.innerHTML = `
     <div class="routine-header">
       <div>
-        <h2>Rotina de ${child.name}</h2>
+        <h2>Rotina de ${esc(child.name)}</h2>
         <p>Configure horários, emojis e recompensas.</p>
       </div>
       <div class="view-toggle">
@@ -1295,8 +1760,8 @@ function renderTaskList(prevIds, newIds) {
       <div class="ntc-icon"><img src="${heroIconSrc}" width="28" height="28" style="display:block;filter:brightness(0) invert(1);"></div>
       <div class="ntc-info">
         <div class="ntc-label">${upcoming ? "Próxima tarefa" : "Última tarefa do dia"}</div>
-        <div class="ntc-time">${nextTask.time || "--:--"}</div>
-        <div class="ntc-name">${nextTask.name}</div>
+        <div class="ntc-time">${esc(nextTask.time || "--:--")}</div>
+        <div class="ntc-name">${esc(nextTask.name)}</div>
       </div>
     `;
     list.innerHTML = "";
@@ -1334,13 +1799,13 @@ function createTaskCard(t, todayIdx, prevIds, newIds) {
   const iconObj = SUGGESTED_ICONS.find(ic => ic.name === (t.emoji || "smile")) || SUGGESTED_ICONS[0];
   const iconSrc = iconObj ? iconObj.src : `https://img.icons8.com/ios-filled/32/smile.png`;
   card.innerHTML = `
-    <div class="task-heart ${t.color}"><img src="${iconSrc}" width="22" height="22" style="display:block;filter:brightness(0) invert(1);"></div>
+    <div class="task-heart ${esc(t.color)}"><img src="${iconSrc}" width="22" height="22" style="display:block;filter:brightness(0) invert(1);"></div>
     <div class="task-info">
-      <div class="t-hour">${t.time}</div>
-      <div class="t-name">${t.name}</div>
+      <div class="t-hour">${esc(t.time)}</div>
+      <div class="t-name">${esc(t.name)}</div>
       <div class="task-days">${dayPills}</div>
     </div>
-    <div class="task-actions"><button title="Remover" data-id="${t.id}"><img src="https://img.icons8.com/ios-filled/18/8B889C/trash.png" style="vertical-align:middle;"></button></div>
+    <div class="task-actions"><button title="Remover" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/trash.png" style="vertical-align:middle;"></button></div>
   `;
   card.querySelector("button").addEventListener("click", () => deleteTask(t.id, t.name));
   
@@ -1353,21 +1818,35 @@ function createTaskCard(t, todayIdx, prevIds, newIds) {
 }
 
 async function addTask() {
-  const time = document.getElementById("nt-time").value;
-  const name = document.getElementById("nt-name").value.trim();
-  const emoji = selectedTaskEmoji || "smile";
-  const color = document.getElementById("nt-color").value;
-
-  if (!time || !name) {
-    if (!name) document.getElementById("nt-name").focus();
-    return;
-  }
-  if (!newTaskDays.length) { alert("Selecione ao menos um dia."); return; }
-
-  document.getElementById("modal-task").classList.remove("open");
-  
-  await db.collection("tasks").add({
-    childId: state.activeChildId, time, name, emoji, color, days: newTaskDays, active: true
+  await withGuard(document.getElementById("nt-save"), "createTask", "CREATE_TASK", async () => {
+    const limit = enforceResourceLimit("tasks", state.tasks.length);
+    if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "tasks" }, "WARNING"); return; }
+    const time = document.getElementById("nt-time").value;
+    const nameVal = validateText(document.getElementById("nt-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome da tarefa" });
+    const emoji = selectedTaskEmoji || "smile";
+    const color = document.getElementById("nt-color").value;
+    if (!time || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      alert("Horário inválido.");
+      return;
+    }
+    if (!nameVal.ok) {
+      if (!nameVal.value) document.getElementById("nt-name").focus();
+      else alert(nameVal.error);
+      return;
+    }
+    if (!newTaskDays.length) {
+      alert("Selecione ao menos um dia.");
+      return;
+    }
+    if (!COLORS.some(c => c.key === color)) {
+      alert("Estado inválido.");
+      return;
+    }
+    document.getElementById("modal-task").classList.remove("open");
+    await db.collection("tasks").add({
+      childId: state.activeChildId, time, name: nameVal.value, emoji, color, days: newTaskDays, active: true
+    });
+    logAudit("CREATE_TASK", { childId: state.activeChildId });
   });
 }
 
@@ -1397,6 +1876,7 @@ async function deleteTask(taskId, taskName) {
   await new Promise(r => setTimeout(r, 4200));
   if (!undone) {
     await db.collection("tasks").doc(taskId).delete();
+    logAudit("DELETE_TASK", { taskId });
   }
 }
 
