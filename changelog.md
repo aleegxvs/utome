@@ -120,7 +120,38 @@ Cross-Origin-Opener-Policy policy would block the window.closed call.
 
 ---
 
-## [v1.6] — Fix name undefined + onSnapshot tempo real + campos extras na criança
+## [v1.7] — MVP UI/UX: Paleta laranja, sidebar reformulada, task card hierárquico, toast + modal-confirm
+**Data:** 2025-06-15
+
+### ➕ Adicionado
+- **`--orange` e `--orange-dark`** como variáveis CSS; `#app .btn` sobrepõe o gradiente para laranja, mantendo o auth-screen intocado
+- **Logo SVG laranja no topbar** — substitui o `<div class="heart">💜</div>` pelo mesmo `auth-logo-icon` da tela de login; cor de marca consistente do login ao painel
+- **Sidebar reformulada (B)** — item ativo usa `border-left: 4px solid var(--child-color)` + fundo `color-mix(12%)` em vez de roxo sólido; avatar 36px; `font-weight:700` no nome; cor de cada criança aplicada via CSS custom property `--child-color`
+- **Task card com hierarquia (C)** — hora em `font-size:18px; font-weight:700` (`.t-hour`); nome em `font-size:13px; color:var(--muted)` (`.t-name`); dias como pílulas `.task-day-pill` com destaque `.today` (laranja) para o dia atual da semana
+- **Toast de undo (E)** — `deleteTask()` remove otimisticamente do state + renderiza; exibe toast "Tarefa removida · Desfazer" por 4s; deleção no Firestore só acontece após 4.2s se não houver undo
+- **Modal de confirmação (E)** — `deleteChild()` usa `showConfirmModal()` em vez de `confirm()` nativo; modal com título, descrição e botão vermelho explícito
+- **`showToast(msg, onUndo)`** — helper reutilizável para feedbacks futuros
+- **`showConfirmModal(title, text)`** — retorna Promise<boolean>, reutilizável
+
+### ➖ Removido
+- `<span class="device-id-pill">device: ${child.deviceId}</span>` do header da rotina (D) — deviceId agora só existe no Firestore
+- `.device-id-pill` do CSS
+- `.child-item.active { background: var(--violet); color: #fff }` — substituído pelo sistema de cor por criança
+- `confirm()` nativo em `deleteChild()` e ausência de feedback em `deleteTask()`
+- `.t-time` (classe) — substituída por `.t-hour` e `.t-name` separados
+- `.task-days` como texto corrido — substituída por pílulas
+
+### 🔧 Ajustado
+- `deleteTask(taskId)` agora recebe `(taskId, taskName)` — o nome é usado no toast
+- `renderTaskList()` calcula `todayIdx` (0=Seg, 6=Dom) para destacar a pílula do dia atual
+- Day-toggle ativo usa `var(--orange)` em vez de `var(--violet)`
+- `.add-child-btn:hover` e `.field input:focus` já usavam laranja; agora consistente com o app todo
+
+### ⚠️ Observações
+- `color-mix(in srgb, ...)` é suportado em Chrome 111+, Firefox 113+, Safari 16.2+ — cobre >95% dos browsers ativos; fallback gracioso (sem borda colorida) em browsers antigos
+- O undo do toast é client-side only: se o usuário fechar a aba em menos de 4s após deletar, a tarefa é perdida (comportamento esperado para MVP)
+
+
 **Data:** 2025-06-15
 
 ### ➕ Adicionado
