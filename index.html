@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
 <link rel="shortcut icon" href="image.png" type="image/x-icon">
-  <style>
-  :root{--violet:#7C6FE0;--violet-dark:#5B4FC9;--bg:#F6F4FB;--card:#FFFFFF;--ink:#2B2A3D;--muted:#8B889C;--line:#E7E3F3;--blue:#6FA8E0;--green:#5FCBA3;--purple:#B68CE0;--yellow:#F0C674;--radius:18px;--red:#E74C3C;}
+<style>
+  :root{--violet:#7C6FE0;--violet-dark:#5B4FC9;--orange:#FF7A00;--orange-dark:#E55A00;--bg:#F6F4FB;--card:#FFFFFF;--ink:#2B2A3D;--muted:#8B889C;--line:#E7E3F3;--blue:#6FA8E0;--green:#5FCBA3;--purple:#B68CE0;--yellow:#F0C674;--radius:18px;--red:#E74C3C;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
   h1,h2,h3{font-family:'Quicksand',sans-serif;font-weight:700;}
@@ -99,49 +99,68 @@
   .panel{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 6px 24px rgba(124,111,224,0.06);}
   .panel h2{font-size:16px;margin-bottom:14px;}
   
-  .child-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;font-size:14px;margin-bottom:6px;transition:background .15s;}
+  .child-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;font-size:14px;margin-bottom:6px;transition:background .15s;border-left:4px solid transparent;cursor:pointer;}
   .child-item:hover{background:var(--bg);}
-  .child-item.active{background:var(--violet);color:#fff;}
-  .child-item small{display:block;font-size:11px;opacity:.7;font-family:monospace;}
-  .child-item.active small{color:#E8E4FA;}
-  .child-delete-btn{border:none;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s;}
+  .child-item.active{border-left-color:var(--child-color,var(--orange));background:color-mix(in srgb,var(--child-color,var(--orange)) 12%,transparent);}
+  .child-item .child-info{flex:1;min-width:0;overflow:hidden;}
+  .child-item .child-info .child-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+  .child-item.active .child-info .child-name{color:var(--child-color,var(--orange));}
+  .child-item small{display:block;font-size:11px;color:var(--muted);margin-top:1px;}
+  .child-delete-btn{border:none;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;}
   .child-item:hover .child-delete-btn{opacity:1;}
-  .child-item.active .child-delete-btn{color:rgba(255,255,255,0.7);}
   .child-delete-btn:hover{color:var(--red)!important;opacity:1!important;}
   .add-child-btn{width:100%;margin-top:12px;padding:9px;border:1.5px dashed var(--line);border-radius:10px;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:inherit;}
-  .add-child-btn:hover{border-color:var(--violet);color:var(--violet);}
+  .add-child-btn:hover{border-color:var(--orange);color:var(--orange);}
   .color-opt{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s;}
   .color-opt.active{border-color:#fff;box-shadow:0 0 0 2px var(--ink);transform:scale(1.15);}
-  .child-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .child-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
   
   .routine-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
   .routine-header p{font-size:13px;color:var(--muted);margin-top:2px;}
-  .device-id-pill{font-family:monospace;font-size:12px;background:var(--bg);padding:5px 10px;border-radius:8px;color:var(--violet-dark);}
   .day-toggle{display:flex;gap:6px;margin:14px 0 18px;}
-  .day-toggle button{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
-  .day-toggle button.on{background:var(--violet);color:#fff;border-color:var(--violet);}
+  .day-toggle button{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+  .day-toggle button.on{background:var(--orange);color:#fff;border-color:var(--orange);}
   .task-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
-  .task-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;}
-  .task-heart{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;}
+  .task-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;transition:box-shadow .15s;}
+  .task-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);}
+  .task-heart{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
   .task-heart.blue{background:var(--blue);}
   .task-heart.green{background:var(--green);}
   .task-heart.purple{background:var(--purple);}
   .task-heart.yellow{background:var(--yellow);}
   .task-info{flex:1;}
-  .task-info .t-time{font-weight:700;font-size:14px;}
-  .task-info .t-name{font-size:13px;color:var(--muted);}
-  .task-days{font-size:11px;color:var(--muted);margin-top:2px;}
+  .task-info .t-hour{font-size:18px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .task-info .t-name{font-size:13px;color:var(--muted);margin-top:2px;}
+  .task-days{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+  .task-day-pill{font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--line);}
+  .task-day-pill.today{background:var(--orange);color:#fff;border-color:var(--orange);}
   .task-actions button{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:4px 6px;}
   .task-actions button:hover{color:#C0392B;}
   .new-task{border-top:1px dashed var(--line);padding-top:16px;display:grid;grid-template-columns:110px 1fr 90px 110px auto;gap:10px;align-items:end;}
   @media (max-width:700px){.new-task{grid-template-columns:1fr 1fr;}}
   .new-task .field{margin-bottom:0;}
   .new-task select, .new-task input{width:100%;padding:10px 10px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-family:inherit;}
+  /* A: btn no painel usa laranja */
+  #app .btn{background:linear-gradient(135deg,#FF8C00,#FF6000);box-shadow:0 4px 14px rgba(255,110,0,0.30);}
   
   .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
   .empty-state .icon{font-size:64px;margin-bottom:16px;}
   .empty-state h3{font-size:20px;color:var(--ink);margin-bottom:8px;}
   .empty-state p{font-size:14px;margin-bottom:24px;}
+
+  /* E: Toast */
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#2B2A3D;color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,0.25);opacity:0;transition:opacity .25s,transform .25s;z-index:9000;pointer-events:none;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
+  #toast-undo{background:none;border:none;color:var(--orange);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;padding:0;}
+  /* E: Modal de confirmação genérico */
+  #modal-confirm{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:3000;align-items:center;justify-content:center;}
+  #modal-confirm.open{display:flex;}
+  .modal-confirm-box{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .modal-confirm-box h3{font-family:'Quicksand',sans-serif;font-size:18px;margin-bottom:8px;}
+  .modal-confirm-box p{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .modal-confirm-actions{display:flex;gap:10px;}
+  .btn-danger{flex:1;padding:12px;border:none;border-radius:12px;background:var(--red);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:'Quicksand',sans-serif;}
+  .btn-cancel-modal{flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;}
 </style>
 </head>
 <body>
@@ -300,10 +319,30 @@
   </div>
 </div>
 
+<!-- E: Toast de undo -->
+<div id="toast">
+  <span id="toast-msg"></span>
+  <button id="toast-undo">Desfazer</button>
+</div>
+
+<!-- E: Modal de confirmação -->
+<div id="modal-confirm">
+  <div class="modal-confirm-box">
+    <h3 id="modal-confirm-title"></h3>
+    <p id="modal-confirm-text"></p>
+    <div class="modal-confirm-actions">
+      <button class="btn-cancel-modal" id="modal-confirm-cancel">Cancelar</button>
+      <button class="btn-danger" id="modal-confirm-ok">Remover</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <div class="topbar">
     <div class="brand">
-      <div class="heart">💜</div>
+      <div class="auth-logo-icon" style="width:38px;height:38px;border-radius:12px;">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 2C19.5 1.5 26 5.5 26.5 11.5C27 17.5 24 24 18.5 26C13.5 27.5 7 25.5 4 20.5C1 15.5 2 8 5.5 5C8.5 2.5 10 2.3 14 2Z" fill="white"/><rect x="9" y="11" width="3.5" height="11" rx="1.75" fill="#FF6A00"/><path d="M16 11.5L21.5 17L16 22.5" stroke="#FF6A00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
       <div>
         <h1>UTOME</h1>
         <div class="greeting" id="greeting"></div>
@@ -528,12 +567,13 @@ function renderChildren() {
   state.children.forEach(c => {
     const div = document.createElement("div");
     div.className = "child-item" + (c.id === state.activeChildId ? " active" : "");
-    const avatarBg = c.color || "var(--violet)";
+    const childColor = c.color || "#FF7A00";
+    div.style.setProperty("--child-color", childColor);
     const ageLabel = c.age ? `${c.age} anos` : `ID: ${c.deviceId}`;
     div.innerHTML = `
-      <div class="child-avatar" style="background:${avatarBg}22;border:2px solid ${avatarBg};">${c.avatar || "🧒"}</div>
-      <div style="flex:1;cursor:pointer;min-width:0;overflow:hidden;" class="child-select">
-        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+      <div class="child-avatar" style="background:${childColor}22;border:2px solid ${childColor};">${c.avatar || "🧒"}</div>
+      <div class="child-info child-select">
+        <div class="child-name">${c.name}</div>
         <small>${ageLabel}</small>
       </div>
       <button class="child-delete-btn" title="Remover criança" data-id="${c.id}" data-name="${c.name}">×</button>
@@ -548,7 +588,11 @@ function renderChildren() {
 }
 
 async function deleteChild(childId, childName) {
-  if (!confirm(`Remover "${childName}"?\n\nTodas as tarefas desta criança também serão deletadas.`)) return;
+  const confirmed = await showConfirmModal(
+    `Remover "${childName}"?`,
+    `Todas as tarefas desta criança também serão deletadas. Esta ação não pode ser desfeita.`
+  );
+  if (!confirmed) return;
 
   // Busca todas as tasks da criança
   const taskSnap = await db.collection("tasks").where("childId", "==", childId).get();
@@ -646,14 +690,13 @@ function renderRoutine() {
   panel.innerHTML = `
     <div class="routine-header">
       <div><h2>Rotina de ${child.name}</h2><p>Configure horários, emojis e recompensas.</p></div>
-      <span class="device-id-pill">device: ${child.deviceId}</span>
     </div>
     <div id="day-toggle-wrap"></div>
     <div class="task-list" id="task-list"></div>
     <div class="new-task">
       <div class="field"><label>Hora</label><input type="time" id="nt-time" value="08:00"></div>
       <div class="field"><label>Tarefa</label><input type="text" id="nt-name" placeholder="Ex: Escovar dentes"></div>
-      <div class="field"><label>Emoji</label><input type="text" id="nt-emoji" value="😊" maxlength="2"></div>
+      <div class="field"><label>Emoji</label><input type="text" id="nt-emoji" value="😊" maxlength="2" title="Digite qualquer emoji" placeholder="😊"></div>
       <div class="field"><label>Estado</label><select id="nt-color">${COLORS.map(c => `<option value="${c.key}">${c.emoji} ${c.label}</option>`).join("")}</select></div>
       <button class="btn" id="add-task-btn" style="height:40px;">Adicionar</button>
     </div>
@@ -698,13 +741,27 @@ function renderTaskList() {
     list.innerHTML = '<div class="empty-state" style="padding:30px 10px;"><div class="icon">📋</div><h3>Nenhuma tarefa</h3><p>Adicione a primeira tarefa abaixo.</p></div>';
     return;
   }
+  // Descobre o dia de hoje (0=Seg, 6=Dom) para destacar pílulas
+  const jsDay = new Date().getDay(); // 0=Dom, 1=Seg...
+  const todayIdx = jsDay === 0 ? 6 : jsDay - 1;
+
   list.innerHTML = "";
   state.tasks.forEach(t => {
-    const days = t.days.map(d => DAY_LABELS[d]).join(", ");
     const card = document.createElement("div");
     card.className = "task-card";
-    card.innerHTML = `<div class="task-heart ${t.color}">${t.emoji}</div><div class="task-info"><div class="t-time">${t.time} · ${t.name}</div><div class="task-days">${days}</div></div><div class="task-actions"><button title="Remover" data-id="${t.id}">🗑️</button></div>`;
-    card.querySelector("button").addEventListener("click", () => deleteTask(t.id));
+    const dayPills = (t.days || []).map(d =>
+      `<span class="task-day-pill${d === todayIdx ? " today" : ""}">${DAY_LABELS[d]}</span>`
+    ).join("");
+    card.innerHTML = `
+      <div class="task-heart ${t.color}">${t.emoji}</div>
+      <div class="task-info">
+        <div class="t-hour">${t.time}</div>
+        <div class="t-name">${t.name}</div>
+        <div class="task-days">${dayPills}</div>
+      </div>
+      <div class="task-actions"><button title="Remover" data-id="${t.id}">🗑️</button></div>
+    `;
+    card.querySelector("button").addEventListener("click", () => deleteTask(t.id, t.name));
     list.appendChild(card);
   });
 }
@@ -729,12 +786,71 @@ async function addTask() {
   await selectChild(state.activeChildId);
 }
 
-async function deleteTask(taskId) {
-  await db.collection("tasks").doc(taskId).delete();
+async function deleteTask(taskId, taskName) {
+  // Remove otimisticamente do state
+  const removedTask = state.tasks.find(t => t.id === taskId);
   state.tasks = state.tasks.filter(t => t.id !== taskId);
-  renderRoutine();
+  renderTaskList();
+
+  let undone = false;
+  let toastTimer;
+
+  showToast(`"${taskName || "Tarefa"}" removida`, async () => {
+    // Undo: restaura localmente e no Firestore
+    undone = true;
+    if (removedTask) {
+      state.tasks.push(removedTask);
+      state.tasks.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+      renderTaskList();
+    }
+  });
+
+  // Aguarda 4s antes de deletar de verdade (janela de undo)
+  await new Promise(r => setTimeout(r, 4200));
+  if (!undone) {
+    await db.collection("tasks").doc(taskId).delete();
+  }
+}
+// ── Toast (E) ────────────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, onUndo) {
+  const toast = document.getElementById("toast");
+  const msgEl = document.getElementById("toast-msg");
+  const undoBtn = document.getElementById("toast-undo");
+
+  msgEl.textContent = msg;
+  undoBtn.style.display = onUndo ? "inline" : "none";
+  toast.classList.add("show");
+
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove("show"), 4000);
+
+  undoBtn.onclick = () => {
+    toast.classList.remove("show");
+    if (_toastTimer) clearTimeout(_toastTimer);
+    if (onUndo) onUndo();
+  };
+}
+
+// ── Modal de confirmação (E) ─────────────────────────────
+function showConfirmModal(title, text) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("modal-confirm");
+    document.getElementById("modal-confirm-title").textContent = title;
+    document.getElementById("modal-confirm-text").textContent = text;
+    modal.classList.add("open");
+
+    const onOk = () => { modal.classList.remove("open"); cleanup(); resolve(true); };
+    const onCancel = () => { modal.classList.remove("open"); cleanup(); resolve(false); };
+    const cleanup = () => {
+      document.getElementById("modal-confirm-ok").removeEventListener("click", onOk);
+      document.getElementById("modal-confirm-cancel").removeEventListener("click", onCancel);
+    };
+    document.getElementById("modal-confirm-ok").addEventListener("click", onOk);
+    document.getElementById("modal-confirm-cancel").addEventListener("click", onCancel);
+  });
 }
 
 </script>
 </body>
-</html>   
+</html>
