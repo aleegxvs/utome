@@ -4,6 +4,75 @@
 
 ---
 
+## [v2.2] — Camada de Segurança Completa (MFA, Rate Limit, Anomaly, Resource Limits)
+**Data:** 2026-06-16
+
+### 🔒 Alta prioridade — reforço e consolidação
+- **CSP aprimorada (`<meta>` + `vercel.json`):** `base-uri`, `form-action`, `object-src`, `frame-ancestors 'none'` (headers); clickjacking bloqueado via `X-Frame-Options: DENY`
+- **HTTPS Enforcement (client-side):** redirect automático `http → https` fora de localhost
+- **HSTS:** mantido em `vercel.json` (`max-age=31536000; includeSubDomains; preload`)
+- **Módulo `UTOME_SEC`:** camada centralizada com `sanitizeText`, `validateEmail`, `validatePassword`, `validateImageFile`, `esc()` (escape HTML), `checkRateLimit`, `recordAction`, `detectAnomaly`, `enforceResourceLimit`, `initSessionSecurity`
+- **Input Validation + Sanitization:** todos os campos de texto passam por validação tipada antes do Firestore; renderização DOM usa `esc()` contra XSS refletido/armazenado
+- **Secure File Upload:** helper único com whitelist MIME, limite 500KB, reset do input após rejeição; `accept` restrito no HTML
+- **Enumeration Protection:** mensagens genéricas em login/registro/social/MFA; sem vazamento de existência de e-mail
+- **Session Management:** persistência `LOCAL`; `getIdToken(true)` no login para rotacionar token
+- **Session Fixation Protection:** `sessionStorage` com `utome_session_id` (UUID) por sessão; limpeza no logout
+- **Audit Logging ampliado:** `DELETE_TASK`, `RATE_LIMIT_HIT`, `ANOMALY_*`, `MFA_*`, `RESOURCE_LIMIT`; inclui `sessionId` e contagem de ações
+
+### 🔒 Média prioridade — implementado
+- **MFA / 2FA (Firebase Phone):** seção no modal de perfil para cadastro SMS; modal de verificação no login quando `auth/multi-factor-auth-required`
+- **Rate Limiting:** janela deslizante via `localStorage` — login (5/15min), registro (3/h), criação criança/tarefa, upload
+- **Bot Protection:** App Check (reCAPTCHA v3) + botões desabilitados via `withGuard()` + `RecaptchaVerifier` no fluxo MFA
+- **Anti-Scraping:** App Check + detecção de `navigator.webdriver` (audit log)
+- **Resource Limiting:** máx. 10 crianças por conta, 50 tarefas por criança, validação de tamanho base64 no save de foto
+- **Anomaly Detection:** monitora >40 ações/min, >5 falhas de login, spikes de upload rejeitado — gera audit `CRITICAL`/`WARNING`
+
+### ⚠️ Configuração manual necessária
+- Registrar **reCAPTCHA v3** no Firebase Console → App Check (`RECAPTCHA_KEY` no HTML)
+- Habilitar **Multi-Factor Authentication (Phone)** no Firebase Console → Authentication → Sign-in method
+- Colar **Firestore Security Rules** (documentadas em v1.5) no Firebase Console
+
+---
+
+## [v2.1] — Sistemas de Segurança (CSP, Sanitização, Vercel, App Check, Audit)
+**Data:** 2026-06-16
+
+### 🔒 Adicionado / Implementado
+- **Vercel Security Headers (`vercel.json`):** Adicionado arquivo de configuração de hospedagem para injetar headers de proteção: Content-Security-Policy (CSP), X-Frame-Options (Clickjacking), HSTS (HTTPS Enforcement) e X-Content-Type-Options.
+- **CSP `<meta>` tag:** Adicionada tag Content-Security-Policy direto no HTML.
+- **Input Sanitization e Validação:** Adicionado DOMPurify via CDN (v3.0.3). Todos os inputs de texto do usuário (nome, nick, nome da tarefa) são purificados antes da inserção no Firestore para prevenir Stored XSS.
+- **Secure File Upload:** Validação restrita de tipo de arquivo (`image/jpeg`, `image/png`, `image/webp`) e tamanho máximo (500KB) para as fotos de perfil e das crianças, prevenindo abuso de armazenamento.
+- **Session Management e Anti-Enumeração:** Persistência configurada ativamente (`LOCAL`) e erros de autenticação exibem mensagens genéricas ("Credenciais inválidas") para evitar o vazamento da existência ou não de e-mails no banco de dados.
+- **Audit Logging:** Função `logAudit(action, details, severity)` implementada para registrar eventos importantes (login, criações e deleções) em `/users/{uid}/audit_logs/` do Firestore.
+- **Rate Limiting & Bot Protection:** Botões entram em estado "disabled" durante o processamento para evitar submissões múltiplas.
+- **Firebase App Check (reCAPTCHA):** Lógica do App Check inicializada no boot do app. O reCAPTCHA protegerá as APIs do Firebase contra requisições não autorizadas, scraping e bots (exige cadastro de chave do reCAPTCHA no Firebase Console).
+
+---
+
+## [v2.0] — Fix tema escuro no modal + Fix Google login redirect
+**Data:** 2026-06-16
+
+### 🔧 Corrigido — Tema escuro
+
+- `.modal-task-box` e `.modal-confirm-box` usavam `background:#fff` fixo → trocado para `var(--card)`
+- `.modal-task-days button` usava `background:#fff` fixo → trocado para `var(--card)`
+- `.btn-modal-cancel` e `.btn-cancel-modal` usavam `background:none` → trocado para `var(--card)` + `color:var(--ink)` explícito
+- Dark overrides adicionados: `.emoji-grid button`, `.day-toggle button`, `.add-task-floating:hover`
+- Resultado: todos os textos e controles do modal ficam visíveis no tema escuro
+
+### 🔧 Corrigido — Google login com `signInWithRedirect`
+
+**Causa do bug:** race condition entre o `setTimeout` de 2s do splash e a inicialização assíncrona do Firebase após o redirect do Google. O timer expirava com `auth.currentUser` ainda `null`, exibindo a tela de auth antes do `onAuthStateChanged` resolver.
+
+**Solução:** substituição do `setTimeout` simples por um sistema de duas flags (`firebaseResolved` + `splashTimerDone`). O splash só some quando ambas são `true`. O `onAuthStateChanged` sinaliza `firebaseResolved = true` e decide a navegação (app ou auth/onboarding) — eliminando a decisão do timer.
+
+- `tryHideSplash()` — função que aguarda as duas condições antes de esconder o splash
+- `onAuthStateChanged` agora é a única fonte de verdade para navegação pós-autenticação
+- Lógica do onboarding movida para dentro do `onAuthStateChanged` (branch `user === null`)
+- `getRedirectResult` mantido apenas para criação do doc Firestore em novos usuários
+
+---
+
 ## [v1.9] — Perfil do Responsável + Icons8 Apple + Upload de Foto (Criança e Usuário)
 **Data:** 2025-06-15
 
