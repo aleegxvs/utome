@@ -173,3 +173,62 @@ Cross-Origin-Opener-Policy policy would block the window.closed call.
 ### ⚠️ Observações
 - `onSnapshot` consome uma conexão WebSocket persistente por criança ativa — é o comportamento esperado do Firestore
 - O `taskUnsubscribe` deve ser chamado no `auth.signOut()` para fechar o listener
+---
+
+## [v1.8] — Aba Hoje, Modal de Tarefa, Avatar Topbar, Micro-animações, Onboarding SVG, Skeleton Loading
+**Data:** 2025-06-15
+
+### ➕ F — Aba "Hoje" como view padrão
+- Toggle **Hoje | Semana** no cabeçalho do painel de rotina
+- View "Hoje" filtra apenas as tarefas do dia atual (`todayIdx` = 0=Seg, 6=Dom)
+- Card hero "Próxima tarefa" em destaque: gradiente com `--child-color`, hora em 32px, nome e emoji grandes
+- Se não houver tarefas hoje: estado vazio amigável ("Que tal curtir o dia livre?")
+- View "Semana" preserva o comportamento anterior (todas as tarefas)
+- Estado salvo em `taskView` (variável global, sem persistência — reseta ao trocar criança intencionalmente)
+
+### ➕ G — Formulário de nova tarefa em modal
+- Botão `+ Adicionar tarefa` substitui o formulário inline no rodapé
+- Modal com: hora, estado (select), nome, grid de emojis sugeridos (28 emojis), dias da semana e botão Adicionar
+- `SUGGESTED_EMOJIS[]` — array de 28 emojis relevantes para rotina infantil
+- `setupTaskModal()` — inicializa grid, days e campos a cada abertura
+- `selectedTaskEmoji` — variável global rastreada pelo grid
+- `.emoji-grid button.selected` — destaque visual no emoji escolhido
+- `.modal-task-days button.on` — dias selecionados em laranja (mesmo padrão do day-toggle)
+
+### ➕ H — Topbar com avatar do usuário logado
+- `.user-avatar-btn` — botão circular com a inicial do nome do usuário, gradiente laranja
+- `.user-dropdown` — dropdown com "Nome do usuário" (não-clicável) + separador + botão "Sair" em vermelho
+- Dropdown fecha ao clicar fora (listener no `document`)
+- `logout-btn` movido para dentro do dropdown (sem quebrar o listener de logout existente)
+- Logo UTOME no topbar usa `auth-logo-icon` com SVG inline (mantido do v1.7)
+
+### ➕ I — Micro-animações nas tasks
+- `@keyframes taskEnter` — `opacity:0; translateY(8px) → opacity:1; translateY(0)` em 0.3s
+- `@keyframes taskLeave` — `opacity:1; scale(1) → opacity:0; scale(0.95)` em 0.25s
+- `createTaskCard()` — função helper que aplica `.entering` quando `!prevIds.has(t.id)`
+- `deleteTask()` — aplica `.leaving` no card antes de remover do DOM, aguarda 240ms
+- `renderTaskList()` agora recebe `(prevIds, newIds)` opcionais para controlar animações
+
+### ➕ J — Onboarding com identidade visual UTOME
+- Tela 0: mascote SVG UTOME (mesmo do painel direito do login) com animação `float`
+- Tela 1: SVG de avatar de criança com anel colorido e badge de confirmação laranja
+- Tela 2: SVG de relógio/lista de tarefas estilizado com gradiente laranja
+- Textos reescritos: produto-específicos ("O relógio do seu filho mostra a próxima tarefa automaticamente")
+- Botão "Começar" com gradiente laranja e sombra (mesmo estilo do `.btn`)
+- Removidos emojis nativos (💜, 👶, ✅) — substituídos por SVGs inline
+
+### ➕ K — Skeleton loading
+- `showChildrenSkeleton()` — 3 itens skeleton na sidebar com avatar + 2 linhas de texto; chamado antes do `await` em `loadChildren()`
+- `showTasksSkeleton(panel)` — 3 cards skeleton no painel de rotina; chamado antes do `onSnapshot` em `selectChild()`
+- `.skeleton` — classe base com `background linear-gradient` e `@keyframes shimmer` (200% background-size, 1.4s infinite)
+- Classes auxiliares: `.skeleton-child`, `.skeleton-avatar`, `.skeleton-lines`, `.skeleton-line`, `.skeleton-task`, `.skeleton-circle`, `.skeleton-info`
+
+### 🔧 Ajustado
+- `renderRoutine()` passa `prevIds`/`newIds` para `renderTaskList()` para animações corretas
+- `splash` usa logo SVG laranja em vez de emoji 💜 (consistência de marca)
+- `auth-version` atualizado para `v1.8`
+
+### ⚠️ Observações
+- A view "Hoje" usa a mesma lógica de `todayIdx` já existente nos day-pills
+- O card hero de "próxima tarefa" usa `--child-color` via CSS custom property no `.panel` — requer que a cor da criança esteja salva no Firestore
+- Animações respeitam `prefers-reduced-motion` implicitamente via curta duração (< 300ms)
