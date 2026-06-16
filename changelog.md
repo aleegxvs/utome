@@ -4,6 +4,58 @@
 
 ---
 
+## [v1.9] — Perfil do Responsável + Icons8 Apple + Upload de Foto (Criança e Usuário)
+**Data:** 2025-06-15
+
+### ➕ Adicionado
+- **Modal de Perfil do Responsável** — acessível via dropdown "Meu Perfil"
+  - Upload de foto de perfil (base64, armazenado no Firestore em `users/{uid}.photoURL`)
+  - Campo **Nome Completo** editável
+  - Campo **Como o UTOME te chama** (`nick`) — aparece no "Olá, [nick]" do topbar
+  - **Seletor de Tema** — Claro, Escuro, Sistema (persiste em `localStorage("utome_theme")`)
+  - Avatar do topbar atualiza para foto ao salvar; fallback para inicial do nome
+- **Sistema de Tema Claro/Escuro/Sistema**
+  - `[data-theme="dark"]` no `<html>` com variáveis CSS invertidas
+  - `applyTheme(pref)` — aplica tema e persiste preferência
+  - Escuta `prefers-color-scheme` para modo Sistema em tempo real
+  - Dark overrides para `.panel`, `.field input`, `.modal-*`, `.skeleton`, `.user-dropdown`
+- **Upload de foto para crianças** no modal "Nova Criança"
+  - Botão "Enviar foto" com input `<file accept="image/*">`
+  - Preview ao vivo do avatar (base64 → `nc-avatar-preview`)
+  - Campo emoji mantido para quem prefere emoji em vez de foto
+  - `photoURL` salvo no Firestore em `children/{id}`
+  - `renderChildren()` agora prioriza `photoURL` sobre emoji no avatar da sidebar
+- **Item "Meu Perfil"** no dropdown do usuário (antes só tinha "Sair")
+
+### 🔄 Alterado — Icons8 Apple (substituição completa de emojis do sistema)
+- `SUGGESTED_EMOJIS[]` → `SUGGESTED_ICONS[]` — array de objetos `{name, src}` com URLs Icons8 `ios-filled/32`
+- Grid de emojis da tarefa agora exibe `<img>` Icons8 28px em vez de caracteres unicode
+- `task-heart` (círculo colorido da tarefa) exibe ícone Icons8 com `filter: brightness(0) invert(1)` (branco sobre cor)
+- Hero card "Próxima tarefa" usa Icons8 para o ícone grande
+- Ícone de lixeira `🗑️` → `<img>` Icons8 `trash` 18px
+- Ícones de estado vazio: `🎯` → Icons8 `target`, `📋` → Icons8 `task-planning`, `🌟` → Icons8 `sun`
+- Dropdown: ícone de usuário e sair usam Icons8 (`user`, `exit`, `settings`)
+- Botão upload filho usa Icons8 `upload`; câmera do perfil usa Icons8 `camera`
+- `COLORS` array: campos `emoji` removidos; select de estado usa label puro (ícone era decorativo)
+- Onboarding step 1: `<text>👧</text>` em SVG substituído por rosto SVG desenhado inline (sem dependência de unicode)
+- `selectedTaskEmoji` muda de string unicode para `name` (key do ícone)
+- `addTask()` / `createTaskCard()` usam `SUGGESTED_ICONS.find(ic => ic.name === t.emoji)` para lookup
+
+### 🔧 Corrigido
+- `showApp()` agora lê `state.user.nick` para o greeting ("Olá, ...")
+- `onAuthStateChanged` carrega `nick` e `photoURL` do Firestore no `state.user`
+- `h1,h2,h3` agora usam `color:var(--ink)` (compatível com tema escuro)
+
+### ⚠️ Observações
+- Fotos de perfil e de crianças são armazenadas como **base64 no Firestore** — adequado para MVP mas pode crescer rapidamente; migrar para Firebase Storage em versão futura
+- Icons8 free tier exige atribuição; ícones são carregados via CDN `img.icons8.com` (sem API key)
+- `photoURL` em `users/` sobrescreve o `photoURL` do Firebase Auth (não modifica Auth, só Firestore)
+- Tema persiste via `localStorage`; ao fazer logout e relogin o tema é mantido (comportamento esperado)
+
+
+
+---
+
 ## [v1.0] — Arquivo original recebido
 **Data:** (antes do rastreamento)
 **Arquivo:** `utome-index.html`
