@@ -6,7 +6,6 @@
 <title>UTOME · Painel da Família</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
-<link rel="shortcut icon" href="image.png" type="image/x-icon">
 <style>
   :root{--violet:#7C6FE0;--violet-dark:#5B4FC9;--bg:#F6F4FB;--card:#FFFFFF;--ink:#2B2A3D;--muted:#8B889C;--line:#E7E3F3;--blue:#6FA8E0;--green:#5FCBA3;--purple:#B68CE0;--yellow:#F0C674;--radius:18px;--red:#E74C3C;}
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -99,14 +98,20 @@
   .panel{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 6px 24px rgba(124,111,224,0.06);}
   .panel h2{font-size:16px;margin-bottom:14px;}
   
-  .child-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;cursor:pointer;font-size:14px;margin-bottom:6px;transition:background .15s;}
+  .child-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;font-size:14px;margin-bottom:6px;transition:background .15s;}
   .child-item:hover{background:var(--bg);}
   .child-item.active{background:var(--violet);color:#fff;}
   .child-item small{display:block;font-size:11px;opacity:.7;font-family:monospace;}
   .child-item.active small{color:#E8E4FA;}
-  .add-child{display:flex;gap:6px;margin-top:12px;}
-  .add-child input{flex:1;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-family:inherit;}
-  .add-child button{border:none;background:var(--violet);color:#fff;border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer;font-size:18px;}
+  .child-delete-btn{border:none;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s;}
+  .child-item:hover .child-delete-btn{opacity:1;}
+  .child-item.active .child-delete-btn{color:rgba(255,255,255,0.7);}
+  .child-delete-btn:hover{color:var(--red)!important;opacity:1!important;}
+  .add-child-btn{width:100%;margin-top:12px;padding:9px;border:1.5px dashed var(--line);border-radius:10px;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:inherit;}
+  .add-child-btn:hover{border-color:var(--violet);color:var(--violet);}
+  .color-opt{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s;}
+  .color-opt.active{border-color:#fff;box-shadow:0 0 0 2px var(--ink);transform:scale(1.15);}
+  .child-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
   
   .routine-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
   .routine-header p{font-size:13px;color:var(--muted);margin-top:2px;}
@@ -257,6 +262,43 @@
   </div>
 </div>
 
+<!-- Modal: Nova Criança -->
+<div id="modal-child" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <h2 style="font-size:18px;margin-bottom:20px;font-family:'Quicksand',sans-serif;">Nova Criança</h2>
+
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="nc-name" placeholder="Ex: Sofia">
+    </div>
+    <div class="field">
+      <label>Avatar (emoji)</label>
+      <input type="text" id="nc-avatar" value="🧒" maxlength="2" style="font-size:22px;text-align:center;">
+    </div>
+    <div class="field">
+      <label>Idade</label>
+      <input type="number" id="nc-age" placeholder="Ex: 7" min="1" max="17">
+    </div>
+    <div class="field">
+      <label>Cor favorita</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="nc-color-picker">
+        <button class="color-opt active" data-color="#FF7A00" style="background:#FF7A00;"></button>
+        <button class="color-opt" data-color="#7C6FE0" style="background:#7C6FE0;"></button>
+        <button class="color-opt" data-color="#5FCBA3" style="background:#5FCBA3;"></button>
+        <button class="color-opt" data-color="#E0726F" style="background:#E0726F;"></button>
+        <button class="color-opt" data-color="#6FA8E0" style="background:#6FA8E0;"></button>
+        <button class="color-opt" data-color="#F0C674" style="background:#F0C674;"></button>
+        <button class="color-opt" data-color="#B68CE0" style="background:#B68CE0;"></button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn" id="nc-save" style="flex:1;">Salvar</button>
+      <button id="nc-cancel" style="flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <div class="topbar">
     <div class="brand">
@@ -273,10 +315,7 @@
     <div class="panel">
       <h2>Crianças</h2>
       <div id="children-list"></div>
-      <div class="add-child">
-        <input type="text" id="new-child-name" placeholder="Nome da criança">
-        <button id="add-child-btn">+</button>
-      </div>
+      <button class="add-child-btn" id="add-child-btn">+ Nova criança</button>
     </div>
 
     <div class="panel" id="routine-panel">
@@ -315,6 +354,7 @@ let state = {user:null,children:[],activeChildId:null,tasks:[]};
 let authMode = "login";
 let newTaskDays = [0,1,2,3,4,5,6];
 let onboardingDone = localStorage.getItem("utome_onboarding") === "true";
+let taskUnsubscribe = null; // guarda o listener ativo de tasks
 
 setTimeout(() => {
   document.getElementById("splash").style.display = "none";
@@ -377,18 +417,26 @@ document.getElementById("auth-toggle").addEventListener("click", () => {
   document.getElementById("auth-error").style.display = "none";
 });
 
+// Captura o resultado do redirect ao voltar para a página
+auth.getRedirectResult().then(async (result) => {
+  if (!result || !result.user) return;
+  const user = result.user;
+  const docRef = db.collection("users").doc(user.uid);
+  const doc = await docRef.get();
+  if (!doc.exists) {
+    await docRef.set({name: user.displayName || "Usuário", email: user.email || ""});
+  }
+}).catch((e) => {
+  const errBox = document.getElementById("auth-error");
+  if (errBox) { errBox.textContent = e.message; errBox.style.display = "block"; }
+});
+
 document.getElementById("btn-google").addEventListener("click", async () => {
   const errBox = document.getElementById("auth-error");
   errBox.style.display = "none";
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    const docRef = db.collection("users").doc(user.uid);
-    const doc = await docRef.get();
-    if (!doc.exists) {
-      await docRef.set({name: user.displayName || "Usuário", email: user.email});
-    }
+    await auth.signInWithRedirect(provider);
   } catch(e) {
     errBox.textContent = e.message;
     errBox.style.display = "block";
@@ -400,13 +448,7 @@ document.getElementById("btn-apple").addEventListener("click", async () => {
   errBox.style.display = "none";
   try {
     const provider = new firebase.auth.OAuthProvider("apple.com");
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    const docRef = db.collection("users").doc(user.uid);
-    const doc = await docRef.get();
-    if (!doc.exists) {
-      await docRef.set({name: user.displayName || "Usuário", email: user.email || ""});
-    }
+    await auth.signInWithRedirect(provider);
   } catch(e) {
     errBox.textContent = e.message;
     errBox.style.display = "block";
@@ -443,16 +485,25 @@ document.getElementById("auth-submit").addEventListener("click", async () => {
 });
 
 document.getElementById("logout-btn").addEventListener("click", () => {
+  if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
   auth.signOut();
 });
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     const doc = await db.collection("users").doc(user.uid).get();
-    state.user = {uid:user.uid,...doc.data()};
+    const data = doc.exists ? doc.data() : {};
+    // Fallback chain: Firestore name → provider displayName → "Usuário"
+    const name = data.name || user.displayName || "Usuário";
+    if (!doc.exists) {
+      // Cria o doc se veio de redirect social sem doc prévio
+      await db.collection("users").doc(user.uid).set({name, email: user.email || ""});
+    }
+    state.user = {uid: user.uid, name, email: user.email || "", ...data};
     showApp();
   } else {
     state.user = null;
+    if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
     if (onboardingDone) showAuth();
   }
 });
@@ -476,20 +527,91 @@ function renderChildren() {
   state.children.forEach(c => {
     const div = document.createElement("div");
     div.className = "child-item" + (c.id === state.activeChildId ? " active" : "");
-    div.innerHTML = `<div>${c.name}<small>ID: ${c.deviceId}</small></div>`;
-    div.addEventListener("click", () => selectChild(c.id));
+    const avatarBg = c.color || "var(--violet)";
+    const ageLabel = c.age ? `${c.age} anos` : `ID: ${c.deviceId}`;
+    div.innerHTML = `
+      <div class="child-avatar" style="background:${avatarBg}22;border:2px solid ${avatarBg};">${c.avatar || "🧒"}</div>
+      <div style="flex:1;cursor:pointer;min-width:0;overflow:hidden;" class="child-select">
+        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+        <small>${ageLabel}</small>
+      </div>
+      <button class="child-delete-btn" title="Remover criança" data-id="${c.id}" data-name="${c.name}">×</button>
+    `;
+    div.querySelector(".child-select").addEventListener("click", () => selectChild(c.id));
+    div.querySelector(".child-delete-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteChild(c.id, c.name);
+    });
     list.appendChild(div);
   });
 }
 
-document.getElementById("add-child-btn").addEventListener("click", async () => {
-  const input = document.getElementById("new-child-name");
-  const name = input.value.trim();
-  if (!name) return;
-  const deviceId = Math.random().toString(16).slice(2,10);
-  const docRef = await db.collection("children").add({userId:state.user.uid,name,deviceId});
-  input.value = "";
-  state.children.push({id:docRef.id,name,deviceId,userId:state.user.uid});
+async function deleteChild(childId, childName) {
+  if (!confirm(`Remover "${childName}"?\n\nTodas as tarefas desta criança também serão deletadas.`)) return;
+
+  // Busca todas as tasks da criança
+  const taskSnap = await db.collection("tasks").where("childId", "==", childId).get();
+
+  // Deleta em batch (mais eficiente e atômico)
+  const batch = db.batch();
+  taskSnap.docs.forEach(doc => batch.delete(doc.ref));
+  batch.delete(db.collection("children").doc(childId));
+  await batch.commit();
+
+  // Atualiza state local
+  state.children = state.children.filter(c => c.id !== childId);
+  if (state.activeChildId === childId) {
+    state.activeChildId = null;
+    state.tasks = [];
+  }
+  renderChildren();
+  if (state.activeChildId) {
+    selectChild(state.activeChildId);
+  } else {
+    const panel = document.getElementById("routine-panel");
+    panel.innerHTML = '<div class="empty-state"><div class="icon" style="font-size:48px">🎯</div><h3>Selecione uma criança</h3><p>Escolha uma criança na esquerda para configurar sua rotina.</p></div>';
+  }
+}
+
+// ── Modal: Nova Criança ──────────────────────────────────
+let selectedColor = "#FF7A00";
+
+document.querySelectorAll(".color-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".color-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedColor = btn.dataset.color;
+  });
+});
+
+document.getElementById("add-child-btn").addEventListener("click", () => {
+  document.getElementById("nc-name").value = "";
+  document.getElementById("nc-avatar").value = "🧒";
+  document.getElementById("nc-age").value = "";
+  selectedColor = "#FF7A00";
+  document.querySelectorAll(".color-opt").forEach((b,i) => b.classList.toggle("active", i===0));
+  document.getElementById("modal-child").style.display = "flex";
+  setTimeout(() => document.getElementById("nc-name").focus(), 50);
+});
+
+document.getElementById("nc-cancel").addEventListener("click", () => {
+  document.getElementById("modal-child").style.display = "none";
+});
+
+document.getElementById("nc-save").addEventListener("click", async () => {
+  const name   = document.getElementById("nc-name").value.trim();
+  const avatar = document.getElementById("nc-avatar").value.trim() || "🧒";
+  const age    = parseInt(document.getElementById("nc-age").value) || null;
+  const color  = selectedColor;
+  if (!name) { document.getElementById("nc-name").focus(); return; }
+
+  const deviceId = Math.random().toString(16).slice(2, 10);
+  const docRef = await db.collection("children").add({
+    userId: state.user.uid, name, avatar, age, color, deviceId
+  });
+  const child = {id: docRef.id, userId: state.user.uid, name, avatar, age, color, deviceId};
+  state.children.push(child);
+  document.getElementById("modal-child").style.display = "none";
   renderChildren();
   selectChild(docRef.id);
 });
@@ -497,9 +619,19 @@ document.getElementById("add-child-btn").addEventListener("click", async () => {
 async function selectChild(childId) {
   state.activeChildId = childId;
   renderChildren();
-  const snap = await db.collection("tasks").where("childId","==",childId).orderBy("time").get();
-  state.tasks = snap.docs.map(d => ({id:d.id,...d.data()}));
-  renderRoutine();
+
+  // Cancela listener anterior para evitar duplicatas
+  if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
+
+  taskUnsubscribe = db.collection("tasks")
+    .where("childId", "==", childId)
+    .onSnapshot((snap) => {
+      state.tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      state.tasks.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+      renderRoutine();
+    }, (err) => {
+      console.error("onSnapshot tasks:", err);
+    });
 }
 
 function renderRoutine() {
@@ -601,6 +733,7 @@ async function deleteTask(taskId) {
   state.tasks = state.tasks.filter(t => t.id !== taskId);
   renderRoutine();
 }
+
 </script>
 </body>
-</html>
+</html>   
