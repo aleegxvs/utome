@@ -1344,15 +1344,12 @@ document.getElementById("auth-toggle").addEventListener("click", () => {
   document.getElementById("auth-error").style.display = "none";
 });
 
-auth.getRedirectResult().then(async (result) => {
-  if (!result || !result.user) return;
-  const user = result.user;
-  const docRef = db.collection("users").doc(user.uid);
-  const doc = await docRef.get();
-  if (!doc.exists) {
-    await docRef.set({name: user.displayName || "Usuário", email: user.email || ""});
-  }
+auth.getRedirectResult().then((result) => {
+  // A criação/leitura do doc do usuário já é tratada de forma centralizada
+  // em onAuthStateChanged (com try/catch). Aqui só repassamos erros do próprio
+  // redirect (ex: popup fechado, conta cancelada, domínio não autorizado).
 }).catch((e) => {
+  console.error("[UTOME] Erro no redirect de login social:", e);
   const errBox = document.getElementById("auth-error");
   if (errBox) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
 });
@@ -1548,19 +1545,32 @@ document.getElementById("profile-save").addEventListener("click", async () => {
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    const doc = await db.collection("users").doc(user.uid).get();
-    const data = doc.exists ? doc.data() : {};
-    const name = data.name || user.displayName || "Usuário";
-    if (!doc.exists) {
-      await db.collection("users").doc(user.uid).set({ name, email: user.email || "" });
+    try {
+      const doc = await db.collection("users").doc(user.uid).get();
+      const data = doc.exists ? doc.data() : {};
+      const name = data.name || user.displayName || "Usuário";
+      if (!doc.exists) {
+        await db.collection("users").doc(user.uid).set({ name, email: user.email || "" });
+      }
+      state.user = { uid: user.uid, name, email: user.email || "", nick: data.nick || "", photoURL: data.photoURL || null, ...data };
+      if (!sessionStorage.getItem("utome_session_id")) await initSessionSecurity(user);
+      closeMfaModal();
+      setLoading(false);
+      firebaseResolved = true;
+      tryHideSplash();
+      showApp();
+    } catch (e) {
+      console.error("[UTOME] Falha ao carregar dados do usuário após login:", e);
+      firebaseResolved = true;
+      tryHideSplash();
+      setLoading(false);
+      const errBox = document.getElementById("auth-error");
+      if (errBox) {
+        errBox.textContent = "Não foi possível carregar sua conta. Tente novamente em alguns instantes.";
+        errBox.style.display = "block";
+      }
+      showAuth();
     }
-    state.user = { uid: user.uid, name, email: user.email || "", nick: data.nick || "", photoURL: data.photoURL || null, ...data };
-    if (!sessionStorage.getItem("utome_session_id")) await initSessionSecurity(user);
-    closeMfaModal();
-    setLoading(false);
-    firebaseResolved = true;
-    tryHideSplash();
-    showApp();
   } else {
     state.user = null;
     clearSessionSecurity();
