@@ -4,6 +4,63 @@
 
 ---
 
+## [v2.5] — Reformulação completa da tela de Login (layout de referência + inputs/botões brancos)
+**Data:** 2026-06-17
+
+### 🎨 Redesign
+- **Novo layout de duas colunas**, inspirado em imagem de referência fornecida pelo usuário:
+  - **Coluna esquerda** (`.auth-left`): logo `utome.png` + nome da marca, headline "Automação **inteligente** para crescer sem limites." com destaque em laranja, subtítulo institucional, e mascote (`utome.png`) flutuando sobre um glow radial laranja (`.auth-mascot-glow`). Visível **apenas no tema claro** (`[data-theme="dark"] .auth-left{display:none;}`), por decisão do usuário.
+  - **Coluna direita** (`.auth-right` / `.auth-card`): card branco flutuante com sombra suave, título "Bem-vindo de volta! 👋", subtítulo com destaque "utome" em laranja, campos de Email/Senha, botão "Continuar", divisor "OU", botões sociais Google/Apple, link de cadastro e rodapé legal.
+- **Logo:** removido o antigo `.auth-logo-icon` com gradiente/box-shadow envolvendo um ícone pequeno — agora usa `utome.png` diretamente (caminho relativo já existente no projeto), em tamanho maior (40px), sem container colorido.
+
+### ⚪ Inputs e botões agora brancos (claro E escuro)
+- `.field input,.field select` — fundo `#fff` fixo com texto `#16151F` (quase preto), inclusive no tema escuro (`[data-theme="dark"] .field input{background:#fff;color:#16151F;}`) — substitui o fix anterior da v2.4 que usava `var(--card)`.
+- `.btn-social` (Google/Apple) — fundo `#fff` fixo com texto escuro em ambos os temas (`[data-theme="dark"] .btn-social{background:#fff;color:#16151F;}`).
+- Card (`.auth-card`) continua usando `var(--card)` para se adaptar ao tema, mas os controles internos (inputs/botões) permanecem brancos conforme solicitado.
+
+### 🧊 Efeito 3D nos botões
+- `.btn` ("Continuar"): gradiente vertical de 3 tons (`#FF9433 → #FF7A00 → #F06A00`) + `box-shadow` combinando highlight interno superior, sombra interna inferior e sombra externa projetada — simula relevo/profundidade. Hover eleva o botão (`translateY(-2px)`) e intensifica a sombra; active recolhe.
+- `.btn-social`: sombra sutil inset + drop-shadow externa para leve elevação; hover sobe 1px e aumenta a sombra.
+
+### 🔧 Ajustado
+- `#auth-screen` — de `display:flex` com painel lateral colorido (gradiente animado) para layout centralizado com `gap` entre as colunas, fundo neutro claro (`#FBFAF8`) que vira `var(--bg)` no escuro.
+- Removidos: `.auth-right` com gradiente animado (`gradientMove`), `.auth-blob-1/2`, `.auth-version` (selo de versão sobre o painel) — não fazem parte do novo layout de referência.
+- `auth-toggle` (JS): trocado `textContent` por `innerHTML` ao alternar Login/Cadastro, para preservar o emoji e o `<span class="accent">` nos textos de título/subtítulo do card.
+- Responsivo (`max-width:900px`): coluna esquerda (headline + mascote) oculta, mantendo apenas o card de login centralizado em telas pequenas.
+
+### ⚠️ Observações
+- O efeito de glow do mascote (`.auth-mascot-glow`) é puramente decorativo (radial-gradient), sem dependência de imagem adicional.
+- Como a coluna esquerda fica oculta no tema escuro, o tema escuro exibe somente o card de login centralizado na tela.
+
+---
+
+## [v2.4] — Fix: campos de Email/Senha "pretos" no tema escuro (sem contraste)
+**Data:** 2026-06-17
+
+### 🐛 Bug identificado
+- No tema escuro, os campos `.field input` e `.field select` (Email, Senha, etc.) usavam `background:#1A1928` fixo — exatamente o mesmo valor hexadecimal de `--bg` no tema escuro (`[data-theme="dark"]{--bg:#1A1928;...}`).
+- Resultado: o input se misturava visualmente com o fundo da página, criando o efeito de "caixa preta sólida" sem nenhum contraste perceptível de campo de formulário (placeholder e borda ficavam quase invisíveis).
+- No tema claro o comportamento era correto: o input usa `#FAFAFE`, um tom levemente diferente do `--bg:#F6F4FB`, mantendo a hierarquia visual.
+
+### 🔧 Corrigido
+- `[data-theme="dark"] .field input,[data-theme="dark"] .field select` — `background:#1A1928` (cor fixa = `--bg`) trocado para `background:var(--card)` (`#242337`), restaurando o contraste entre o campo e o fundo da página, espelhando a lógica já usada no tema claro.
+- **Nota:** esta correção foi substituída na v2.5, que passou a usar fundo branco fixo nos inputs em ambos os temas, por pedido explícito do usuário.
+
+---
+
+## [v2.3] — Documentos Legais Integrados (Política de Privacidade e Termos de Serviço)
+**Data:** 2026-06-16
+
+### 📝 Adicionado / Implementado
+- **Arquivo de políticas ([politica.md](file:///c:/Users/sinua/Downloads/utome-main/politica.md)):** Criação de documento legal contendo a Política de Privacidade (conforme com a LGPD e consentimento específico para dados de menores) e os Termos de Serviço do UTOME em português.
+- **Modal de Documentos Legais (`#modal-legal`):** Criação de um modal responsivo e moderno no `index.html` com abas dinâmicas para navegação entre a Política de Privacidade e os Termos de Serviço diretamente na plataforma.
+- **Design integrado e responsivo:** Estilização utilizando variáveis CSS globais do UTOME (`--card`, `--ink`, `--line`, `--orange`), garantindo suporte automático e contraste adequado no Modo Escuro, além de efeito translúcido de fundo (`backdrop-filter: blur(6px)`).
+
+### 🔧 Ajustado
+- **Links no rodapé de Login/Registro (`.auth-footer`):** Substituição do texto estático por links interativos que ativam o modal diretamente na aba selecionada pelo usuário.
+
+---
+
 ## [v2.2] — Camada de Segurança Completa (MFA, Rate Limit, Anomaly, Resource Limits)
 **Data:** 2026-06-16
 
