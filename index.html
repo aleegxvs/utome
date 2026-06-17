@@ -737,7 +737,7 @@
         
         <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">1. Informações que Coletamos</h4>
         <h5 style="font-weight:700;margin-bottom:4px;">A. Dados do Responsável (Titular da Conta)</h5>
-        <p style="margin-bottom:12px;">Coletamos nome completo, e-mail de cadastro, dados de login social (Google/Apple) e telefone celular (se ativada a verificação em duas etapas via SMS). Também coletamos logs de segurança (endereço IP aproximado, dados do navegador, detecção de bots por reCAPTCHA e logs de sessões).</p>
+        <p style="margin-bottom:12px;">Coletamos nome completo, e-mail de cadastro, dados de login social (Google/Apple) e telefone celular (se ativada a verificação em duas etapas via SMS). Também coletamos logs de segurança (endereço IP aproximado, dados do navegador e logs de sessões).</p>
         <h5 style="font-weight:700;margin-bottom:4px;">B. Dados da(s) Criança(s) (Inseridos pelo Responsável)</h5>
         <p style="margin-bottom:12px;">Coletamos nome ou apelido, idade, foto de perfil (base64) ou emoji de preferência, cor favorita e tarefas de rotina (horários, descrição de atividades e status de conclusão).</p>
         
@@ -745,7 +745,7 @@
         <p style="margin-bottom:12px;">Os dados são usados estritamente para a prestação do serviço de rotina infantil, sincronização com relógios e dispositivos, segurança da conta (prevenção de ataques cibernéticos por monitoramento de anomalias no audit log), envio de códigos de autenticação (SMS 2FA) e melhorias do software.</p>
         
         <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">3. Compartilhamento e Transferência</h4>
-        <p style="margin-bottom:12px;">Não vendemos dados. As informações são armazenadas de forma segura na infraestrutura de servidores do Google Firebase (banco de dados Firestore e Auth) e protegidas pelo reCAPTCHA v3/App Check. A hospedagem do código é realizada na plataforma Vercel.</p>
+        <p style="margin-bottom:12px;">Não vendemos dados. As informações são armazenadas de forma segura na infraestrutura de servidores do Google Firebase (banco de dados Firestore e Auth). A hospedagem do código é realizada na plataforma Vercel.</p>
         
         <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">4. Retenção e Exclusão</h4>
         <p style="margin-bottom:12px;">Os dados das crianças são apagados imediatamente em cascata no Firestore caso a criança seja deletada. A conta e todos os dados associados podem ser completamente excluídos do sistema a qualquer momento pelo usuário.</p>
@@ -767,7 +767,7 @@
         <p style="margin-bottom:12px;">Você deve possuir mais de 18 anos ou ser plenamente capaz sob a lei civil para criar uma conta. O sigilo de suas credenciais de acesso é de sua exclusiva responsabilidade.</p>
         
         <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">3. Uso Aceitável e Restrições</h4>
-        <p style="margin-bottom:12px;">É expressamente proibido burlar os mecanismos de segurança (App Check, logs de segurança, limites de upload, etc.), abusar do Rate Limiting, enviar scripts ou códigos automatizados maliciosos, ou extrair dados sem permissão (scraping).</p>
+        <p style="margin-bottom:12px;">É expressamente proibido burlar os mecanismos de segurança (logs de segurança, limites de upload, etc.), abusar do Rate Limiting, enviar scripts ou códigos automatizados maliciosos, ou extrair dados sem permissão (scraping).</p>
         
         <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">4. Propriedade Intelectual</h4>
         <p style="margin-bottom:12px;">O código-fonte, layout, marcas, mascotes e artes exclusivas do UTOME são protegidos por direitos autorais. O uso do app não transfere qualquer direito de comercialização ou cópia ao usuário.</p>
@@ -841,7 +841,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 
 <script>
 // ── HTTPS Enforcement (exceto localhost) ──
@@ -884,18 +883,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-// App Check (reCAPTCHA v3) - Previne bot/scraping
-// Requer chave registrada em: https://console.firebase.google.com → App Check
-try {
-  const RECAPTCHA_KEY = 'SUA_CHAVE_RECAPTCHA_AQUI';
-  if (RECAPTCHA_KEY && RECAPTCHA_KEY !== 'SUA_CHAVE_RECAPTCHA_AQUI') {
-    const appCheck = firebase.appCheck();
-    appCheck.activate(RECAPTCHA_KEY, true);
-  } else {
-    console.info('[UTOME] App Check desativado: configure RECAPTCHA_KEY para ativar proteção total.');
-  }
-} catch(e) { console.warn('[UTOME] App Check não disponível:', e.message); }
 
 const auth = firebase.auth();
 const db = firebase.firestore();
