@@ -1344,26 +1344,26 @@ document.getElementById("auth-toggle").addEventListener("click", () => {
   document.getElementById("auth-error").style.display = "none";
 });
 
-auth.getRedirectResult().then((result) => {
-  // A criação/leitura do doc do usuário já é tratada de forma centralizada
-  // em onAuthStateChanged (com try/catch). Aqui só repassamos erros do próprio
-  // redirect (ex: popup fechado, conta cancelada, domínio não autorizado).
-}).catch((e) => {
-  console.error("[UTOME] Erro no redirect de login social:", e);
-  const errBox = document.getElementById("auth-error");
-  if (errBox) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
-});
-
 document.getElementById("btn-google").addEventListener("click", async () => {
   const errBox = document.getElementById("auth-error");
   errBox.style.display = "none";
   if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
   recordAction("LOGIN_GOOGLE");
-  document.getElementById("btn-google").disabled = true;
+  const btn = document.getElementById("btn-google");
+  btn.disabled = true;
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithRedirect(provider);
-  } catch(e) { document.getElementById("btn-google").disabled = false; errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
+    await auth.signInWithPopup(provider);
+    logAudit("LOGIN_SUCCESS", { method: "google" });
+    // onAuthStateChanged cuida do resto (carregar/criar doc do usuário e mostrar o app)
+  } catch(e) {
+    console.error("[UTOME] Erro no login com Google:", e);
+    btn.disabled = false;
+    if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      errBox.textContent = getAuthErrorMsg();
+      errBox.style.display = "block";
+    }
+  }
 });
 
 document.getElementById("btn-apple").addEventListener("click", async () => {
@@ -1371,11 +1371,21 @@ document.getElementById("btn-apple").addEventListener("click", async () => {
   errBox.style.display = "none";
   if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
   recordAction("LOGIN_APPLE");
-  document.getElementById("btn-apple").disabled = true;
+  const btn = document.getElementById("btn-apple");
+  btn.disabled = true;
   try {
     const provider = new firebase.auth.OAuthProvider("apple.com");
-    await auth.signInWithRedirect(provider);
-  } catch(e) { document.getElementById("btn-apple").disabled = false; errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; }
+    await auth.signInWithPopup(provider);
+    logAudit("LOGIN_SUCCESS", { method: "apple" });
+    // onAuthStateChanged cuida do resto (carregar/criar doc do usuário e mostrar o app)
+  } catch(e) {
+    console.error("[UTOME] Erro no login com Apple:", e);
+    btn.disabled = false;
+    if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      errBox.textContent = getAuthErrorMsg();
+      errBox.style.display = "block";
+    }
+  }
 });
 
 document.getElementById("auth-submit").addEventListener("click", async () => {
