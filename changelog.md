@@ -4,6 +4,114 @@
 
 ---
 
+## [v2.9] — Regras do Firestore corrigidas + Edição de tarefa + Aviso de limite (80%) + Copiar rotina entre filhos
+**Data:** 2026-06-18
+
+### 🔐 Regras do Firestore (novo arquivo `firestore.rules`)
+- Criado arquivo separado `firestore.rules` com a regra revisada — **este arquivo não é parte do `index.html`**, precisa ser colado manualmente em Firebase Console → Firestore Database → Regras (ou via `firebase deploy --only firestore:rules` se usar Firebase CLI).
+- **Corrigido:** adicionada regra para a subcoleção `users/{userId}/audit_logs/{logId}`, que faltava por completo na regra original. Sem essa regra, o Firestore nega tudo por padrão nesse caminho (nenhum `match` cobria), e toda chamada de `logAudit()` no `index.html` falhava silenciosamente (o código já ignora esse erro com `catch(_) {}`, então não quebrava a UX, mas os logs de segurança nunca eram gravados de fato). Agora: o próprio usuário pode criar/ler seus logs; ninguém pode editar ou apagar um log já gravado (imutabilidade).
+- **Mantido sem alteração funcional, mas documentado:** a regra de `tasks` continua usando `get()/exists()` apontando para `children/{childId}` dentro da condição de uma query `.where()` — usuário confirmou que isso já foi testado e funciona em produção. Adicionado apenas um comentário no arquivo explicando que esse padrão é sensível a documentos "órfãos" (tarefa com `childId` de uma criança já deletada) e que migrar para subcoleção `children/{childId}/tasks/{taskId}` eliminaria essa dependência — registrado como melhoria futura, não aplicado agora para não exigir migração de dados existentes.
+
+### ✏️ Edição de tarefas (horário, nome, ícone, estado, dias)
+- Adicionado botão de editar (ícone de lápis) ao lado do botão de excluir em cada `task-card`, em `createTaskCard()`.
+- `setupTaskModal()` agora aceita um parâmetro opcional `task` — quando fornecido, preenche todos os campos do modal (`#modal-task`) com os dados atuais da tarefa (horário, nome, emoji selecionado, estado/cor, dias da semana marcados) e altera o título do modal para "Editar Tarefa" e o texto do botão para "Salvar alterações".
+- Nova função `openEditTaskModal(taskId)` — busca a tarefa em `state.tasks`, chama `setupTaskModal(task)` e abre o modal.
+- `addTask()` renomeada para `saveTask()`: agora decide entre `db.collection("tasks").add(...)` (criar) ou `.doc(editingTaskId).update(...)` (editar) com base na variável de estado `editingTaskId`. O limite de recursos (`enforceResourceLimit`) só é verificado ao **criar**, nunca ao editar (editar uma tarefa existente não deve ser bloqueado pelo limite de 50 tarefas/criança).
+- Como confirmado pelo usuário, hoje não existe conclusão de tarefa por dia (a tarefa é só a definição da rotina recorrente, sem histórico ainda) — por isso a edição é um `update()` simples e direto, sem nenhuma lógica de "afeta só o futuro vs. já concluído". Se no futuro for implementado o registro de conclusão diária, este ponto precisará ser revisitado.
+
+### ⚠️ Aviso de limite (~80%) para crianças e tarefas
+- Nova função `checkResourceWarning(type, newCount)` — não bloqueia nada (diferente de `enforceResourceLimit`, que bloqueia exatamente no limite), apenas mostra um toast informativo quando o responsável atinge 80% do limite (`Math.ceil(max * 0.8)`):
+  - Crianças: avisa ao atingir 8 de 10 cadastradas.
+  - Tarefas: avisa por criança, ao atingir 40 de 50 tarefas.
+- Cada aviso aparece **no máximo uma vez por sessão** por tipo (e por criança, no caso de tarefas), controlado pela variável `_warnedLimits`, para não repetir o toast a cada tarefa criada depois do gatilho.
+- Conectado em `saveTask()` (após criar tarefa) e no handler de `nc-save` (após criar criança).
+
+### 👥 Copiar rotina entre filhos
+- Novo modal `#modal-copy-routine` (HTML + CSS reaproveitando o estilo visual de `.modal-confirm-box` já existente) — lista todos os outros filhos cadastrados com checkbox, permitindo copiar para um ou mais de uma vez.
+- Novo botão "Copiar rotina" no cabeçalho do painel de rotina (`routine-header`), ao lado do toggle Hoje/Semana — abre o modal para a criança atualmente selecionada.
+- `openCopyRoutineModal(sourceChildId, sourceChildName)`: monta a lista de destinos disponíveis; se não houver outra criança cadastrada, mostra toast informativo em vez de abrir o modal vazio.
+- Handler de confirmação: busca todas as tarefas da criança de origem (`db.collection("tasks").where("childId","==",sourceChildId).get()`), e para cada criança de destino selecionada, calcula quantos slots ainda restam até o limite de 50 tarefas (`UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD`), copia apenas até esse limite via `batch.set()` em lote, e avisa via toast se algum destino já estiver no limite. Cada cópia gera um log de auditoria `COPY_ROUTINE` com origem, destino e quantidade copiada.
+
+### 🧪 Validação
+- Todos os blocos `<script>` validados sintaticamente via parser real (`new Function()`), sem erros.
+- Balanceamento de `<div>` validado em todo o `<body>` antes do script (113 abertas / 113 fechadas).
+- Testado visualmente via Playwright com dados simulados (mock de Firebase, já que o ambiente de teste não tem acesso à rede): confirmado que o botão "Copiar rotina" aparece corretamente no cabeçalho, o modal de cópia lista as outras crianças com checkbox, e o modal de edição abre pré-preenchido com horário/nome/emoji/estado/dias corretos da tarefa selecionada, com título e botão trocados para o modo de edição.
+
+---
+
+## [v2.8] — CAUSA RAIZ CONFIRMADA e corrigida: login Google/Apple voltava para tela de login (storage partitioning)
+**Data:** 2026-06-18
+
+### 🔍 Investigação completa solicitada pelo usuário
+- Auditoria linha a linha de todo o `<script>` principal (mais de 1300 linhas), desde `setPersistence` até `onAuthStateChanged`, incluindo ordem de execução, race conditions e todos os pontos que tocam Firestore no caminho pós-login.
+- Hipóteses descartadas durante a investigação: erros do F12 enviados pelo usuário (são ruído do próprio `accounts.google.com`/ad-blocker, sem relação com o site); domínio ausente em Authorized Domains (usuário confirmou que já estava configurado); falta de try/catch no `onAuthStateChanged` (corrigido na v2.7, mas o sintoma persistiu); ordem entre `setPersistence` e `onAuthStateChanged` (tecnicamente frágil, mas não a causa raiz).
+
+### ✅ Causa raiz real (confirmada na documentação oficial do Firebase, consultada nesta sessão)
+- Fonte: [firebase.google.com/docs/auth/web/redirect-best-practices](https://firebase.google.com/docs/auth/web/redirect-best-practices)
+- O fluxo `signInWithRedirect()` depende de um **iframe cross-origin** que o SDK do Firebase carrega a partir do `authDomain` (no caso, `tomi-ia.firebaseapp.com`) para recuperar o resultado do login após o redirect de volta.
+- **Desde 24 de junho de 2024, isso é bloqueado por padrão no Google Chrome M115+** (e já era bloqueado antes no Firefox 109+ e Safari 16.1+) em qualquer app que **não esteja hospedado no próprio domínio `*.firebaseapp.com`** — que é exatamente o caso do UTOME, hospedado na Vercel.
+- Resultado prático: o usuário autentica corretamente no popup do Google, mas ao retornar para o domínio da Vercel, o navegador bloqueia o acesso ao armazenamento (cookies/IndexedDB) que o iframe do Firebase usaria para repassar a sessão — o Firebase então reporta `user = null` no `onAuthStateChanged`, e o app exibe a tela de login novamente, **mesmo com o try/catch da v2.7 funcionando perfeitamente** (porque tecnicamente não houve erro — o Firebase genuinamente não recebeu o usuário autenticado).
+
+### 🔧 Corrigido
+- `signInWithRedirect(provider)` → `signInWithPopup(provider)` para **Google** e **Apple**. Essa é a correção oficialmente recomendada pelo Firebase como alternativa mais simples ao invés de reconfigurar `authDomain`/proxy/self-host (que exigiriam domínio customizado e mudanças de infraestrutura na Vercel).
+- Removido `auth.getRedirectResult().then(...)` — não é mais necessário, já que `signInWithPopup` resolve a Promise diretamente no clique do botão, sem depender de reload de página nem do iframe cross-origin.
+- Tratamento de erro nos novos handlers: erros esperados de UX (`auth/popup-closed-by-user`, `auth/cancelled-popup-request` — usuário fechou o popup ou clicou duas vezes) não mostram mensagem de erro; qualquer outro erro é logado no console com `console.error("[UTOME] Erro no login com Google/Apple:", e)` e mostra mensagem amigável.
+- `logAudit("LOGIN_SUCCESS", { method: "google"/"apple" })` chamado diretamente após o popup resolver (antes dependia do redirect + getRedirectResult, que não tocava nesse log).
+
+### ⚠️ Trade-off consciente
+- Popups podem ser bloqueados por configurações agressivas de bloqueio de pop-up do navegador (raro, mas existe) e a experiência em mobile é levemente menos fluida que um redirect nativo. Esse é o trade-off reconhecido pela própria documentação do Firebase ao recomendar essa opção como a mais simples diante de hospedagem fora do domínio `firebaseapp.com`.
+- Caso no futuro o domínio customizado do UTOME seja apontado via Firebase Hosting (em vez de/além da Vercel), vale reavaliar a Option 1 da documentação (usar o domínio customizado como `authDomain`), que permitiria voltar a usar `signInWithRedirect` com a experiência de navegação completa, sem popup.
+
+---
+
+## [v2.7] — Fix: login Google autentica mas volta para tela de login (falha silenciosa no onAuthStateChanged)
+**Data:** 2026-06-17
+
+### 🐛 Bug confirmado
+- Após a remoção do App Check (v2.6), o problema de "autentica no Google mas a página volta para o login" persistiu — usuário reportou erros no console do navegador (F12) relacionados a `accounts.youtube.com`, CSP `frame-ancestors` e `net::ERR_BLOCKED_BY_CLIENT` em `play.google.com/log`.
+- **Análise dos erros do F12:** são ruído do próprio ambiente OAuth do Google (página interna do account chooser) e de um ad-blocker/extensão do navegador bloqueando telemetria do Google — não têm relação com o UTOME e não explicam o bug. Confirmado que o domínio de teste já estava na lista de Authorized Domains do Firebase Auth, eliminando essa causa comum.
+
+### 🔍 Causa raiz real
+- `auth.onAuthStateChanged(async (user) => {...})` não tinha **nenhum `try/catch`** envolvendo as chamadas `await db.collection("users").doc(user.uid).get()` / `.set()`.
+- Se essa leitura/escrita no Firestore falhasse por qualquer motivo (regra de segurança, latência logo após o redirect, erro de permissão), a `Promise` rejeitada lançava uma exceção não tratada **dentro do callback**, interrompendo a execução antes de chegar em `showApp()`. Como a tela de login (`#auth-screen`) já começa com `display:flex` por padrão, o resultado visual era "nada muda" — exatamente como voltar para a tela de login, mas na real o app trava silenciosamente no meio do carregamento pós-autenticação, sem nenhum erro visível na UI.
+- Adicionalmente, **tanto `getRedirectResult()` quanto `onAuthStateChanged()` faziam a mesma leitura/escrita no Firestore em paralelo** assim que o usuário retornava do redirect do Google — duas operações concorrentes no mesmo documento, redundantes e potencial fonte de condição de corrida.
+
+### 🔧 Corrigido
+- `onAuthStateChanged`: todo o bloco do `if (user) {...}` agora está dentro de um `try/catch`. Em caso de falha ao carregar/criar o doc do usuário: loga o erro real no console (`console.error`), libera o splash (`firebaseResolved = true; tryHideSplash()`), desativa o loading, mostra mensagem de erro visível no card de login (`"Não foi possível carregar sua conta. Tente novamente em alguns instantes."`) e garante `showAuth()` — ou seja, o usuário agora **vê um erro real** em vez de simplesmente cair de volta numa tela de login "muda".
+- `getRedirectResult()`: removida a leitura/escrita duplicada no Firestore. Agora apenas captura e loga erros do próprio fluxo de redirect (popup fechado, conta cancelada, domínio não autorizado); a criação/leitura do doc do usuário ficou centralizada e protegida só em `onAuthStateChanged`.
+
+### ⚠️ Próximos passos se o problema persistir
+- Abrir o F12 → Console **imediatamente após** tentar logar com Google e procurar por uma linha começando com `[UTOME] Falha ao carregar dados do usuário após login:` — ela vai conter o erro real do Firestore (ex: `permission-denied`, `unavailable`, etc.) e aponta exatamente a causa.
+- Se o erro for `permission-denied`, o próximo ponto a revisar são as **Firestore Security Rules** publicadas no Firebase Console (documentadas desde a v1.5) — regras mal configuradas para a coleção `users` bloqueariam exatamente esse `get()/set()` no primeiro login.
+
+---
+
+## [v2.6] — Remoção completa do App Check / reCAPTCHA v3 (fix login Google travando)
+**Data:** 2026-06-17
+
+### 🐛 Bug relatado
+- Botão de login social demorando muito para abrir o seletor de conta Google.
+- Após escolher a conta Google e autenticar, o app voltava para a tela de login em vez de abrir o painel — sugeria falha silenciosa em algum ponto entre `signInWithRedirect` e `showApp()`.
+
+### 🔍 Diagnóstico
+- O script `firebase-app-check-compat.js` era carregado de forma síncrona/bloqueante antes da inicialização do app, adicionando uma chamada de rede extra antes de qualquer outra coisa rodar — possível causa da demora percebida ao abrir o popup/redirect.
+- O código chamava `firebase.appCheck()` (instanciando o serviço) mesmo com `RECAPTCHA_KEY` ainda como placeholder (`'SUA_CHAVE_RECAPTCHA_AQUI'`) e sem `.activate()` ser executado. Caso o projeto tenha "Enforce App Check" habilitado no Firebase Console para Firestore/Auth sem o token sendo emitido, as chamadas pós-login (`db.collection("users").doc(uid).get()/.set()` dentro do `onAuthStateChanged`) podem ser rejeitadas pelo servidor sem erro visível na UI, fazendo o fluxo nunca chegar em `showApp()` e cair de volta para a tela de auth.
+
+### 🔧 Removido
+- `<script src=".../firebase-app-check-compat.js">` — removido do carregamento de scripts.
+- Bloco de inicialização do App Check (`try { const RECAPTCHA_KEY = ...; firebase.appCheck().activate(...) } catch...`) — removido por completo do `<script>` principal.
+- Menções a "reCAPTCHA" e "App Check" no texto da **Política de Privacidade** (seção 1.A "dados coletados" e seção 3 "compartilhamento e transferência") e nos **Termos de Serviço** (seção 3 "uso aceitável") — ajustadas para não declarar uma proteção que deixou de existir no sistema.
+
+### ✅ Mantido (não é App Check, não foi tocado)
+- `RecaptchaVerifier` invisível (`#recaptcha-mfa`) usado exclusivamente no fluxo de **MFA por telefone** (`getMfaRecaptcha()`, `phoneAuthProvider.verifyPhoneNumber`) — é uma exigência própria do Firebase Auth para 2FA via SMS, mecanismo totalmente independente do App Check/reCAPTCHA v3 que foi removido.
+- `signInWithRedirect` para Google/Apple, `getRedirectResult`, e toda a lógica de `onAuthStateChanged`/`tryHideSplash` — inalterados.
+
+### ⚠️ Observações
+- Se o login social ainda apresentar lentidão ou loop de volta para a tela de auth após este fix, o próximo ponto a checar é a configuração do Firebase Console: **Authentication → Sign-in method → Google/Apple** (domínios autorizados, `authDomain` correto) e, principalmente, se **App Check → Enforce** está ativado para Firestore/Auth no Console — se estiver, precisa ser desativado manualmente lá também, já que removê-lo só do código não desliga a exigência do lado do servidor.
+- Caso a proteção contra bots/scraping seja necessária no futuro, recomenda-se reimplementar com a chave reCAPTCHA real já configurada e testada em ambiente de homologação antes de subir para produção, evitando o cenário de "serviço instanciado sem token válido".
+
+---
+
 ## [v2.5] — Reformulação completa da tela de Login (layout de referência + inputs/botões brancos)
 **Data:** 2026-06-17
 
