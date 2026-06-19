@@ -1,0 +1,2734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; base-uri 'self'; form-action 'self'; object-src 'none';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>UTOME · Painel da Família</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="shortcut icon" href="image.png" type="image/x-icon">
+<style>
+  :root{--violet:#7C6FE0;--violet-dark:#5B4FC9;--orange:#FF7A00;--orange-dark:#E55A00;--bg:#F6F4FB;--card:#FFFFFF;--ink:#2B2A3D;--muted:#8B889C;--line:#E7E3F3;--blue:#6FA8E0;--green:#5FCBA3;--purple:#B68CE0;--yellow:#F0C674;--radius:18px;--red:#E74C3C;}
+  [data-theme="dark"]{--bg:#1A1928;--card:#242337;--ink:#EDEAF8;--muted:#8B88A0;--line:#312F4A;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s;}
+
+  /* Icons8 helper */
+  .ei{display:inline-block;vertical-align:middle;line-height:1;flex-shrink:0;}
+  .ei img{display:block;}
+  h1,h2,h3{font-family:'Quicksand',sans-serif;font-weight:700;color:var(--ink);}
+  [data-theme="dark"] .field input,[data-theme="dark"] .field select{background:var(--card);color:var(--ink);border-color:var(--line);}
+  [data-theme="dark"] .field input::placeholder{color:var(--muted);}
+  [data-theme="dark"] .panel{box-shadow:0 6px 24px rgba(0,0,0,0.3);}
+  [data-theme="dark"] .task-card{background:var(--card);}
+  [data-theme="dark"] .modal-task-box,[data-theme="dark"] .modal-confirm-box,[data-theme="dark"] .profile-box,[data-theme="dark"] .user-dropdown{background:var(--card);border-color:var(--line);}
+  [data-theme="dark"] .btn-social{background:var(--card);border-color:var(--line);color:var(--ink);}
+  [data-theme="dark"] .view-toggle{background:rgba(255,255,255,0.06);}
+  [data-theme="dark"] .view-toggle button.active{background:rgba(255,255,255,0.12);}
+  [data-theme="dark"] .emoji-grid button{background:var(--bg);color:var(--ink);}
+  [data-theme="dark"] .day-toggle button{background:var(--bg);}
+  [data-theme="dark"] .add-task-floating:hover{background:rgba(255,122,0,0.12);}
+  [data-theme="dark"] .skeleton{background:linear-gradient(90deg,#2a283d 25%,#322f4a 50%,#2a283d 75%);background-size:200% 100%;}
+  
+  #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px;}
+  .splash-logo{width:80px;height:80px;background:rgba(255,255,255,0.2);border-radius:24px;display:flex;align-items:center;justify-content:center;animation:pulse 2s ease-in-out infinite;}
+  .splash-text{color:#fff;font-size:20px;font-weight:700;font-family:'Quicksand';}
+  .splash-bar{width:60px;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;overflow:hidden;}
+  .splash-bar-fill{height:100%;background:#fff;animation:slide 2s ease-in-out;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.1);opacity:0.8;}}
+  @keyframes slide{0%{width:0;}100%{width:100%;}}
+  
+  /* ── Onboarding J: SVG identity ── */
+  #onboarding{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;overflow:hidden;}
+  .onboarding-screen{display:none;min-height:100vh;padding:60px 20px 100px;text-align:center;flex-direction:column;justify-content:center;align-items:center;}
+  .onboarding-screen.active{display:flex;}
+  .onboarding-visual{margin-bottom:28px;}
+  .onboarding-screen h1{font-size:28px;margin-bottom:12px;color:var(--ink);}
+  .onboarding-screen p{font-size:15px;color:var(--muted);margin-bottom:40px;max-width:360px;line-height:1.7;}
+  .onboarding-nav{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);display:flex;gap:8px;}
+  .onboarding-nav button{width:10px;height:10px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer;}
+  .onboarding-nav button.active{background:var(--orange);border-color:var(--orange);}
+  .onboarding-btn{padding:14px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,#FF8C00,#E55A00);color:#fff;font-weight:700;cursor:pointer;font-size:15px;font-family:'Quicksand',sans-serif;box-shadow:0 6px 20px rgba(255,110,0,0.35);}
+  .onboarding-btn:hover{opacity:.92;}
+  
+  #offline-banner{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2B2A3D;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:1000;}
+
+/* Offline full-screen modal */
+#offline-screen{display:none;position:fixed;inset:0;background:#F2F2F2;z-index:2000;align-items:center;justify-content:center;}
+#offline-screen .card{background:#fff;padding:32px 24px;max-width:380px;width:90%;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);text-align:center;}
+#offline-screen .card svg{width:120px;height:auto;margin-bottom:24px;}
+#offline-screen .card h1{font-size:48px;margin:0;color:#FF6B00;font-family:'Quicksand',sans-serif;}
+#offline-screen .card h2{font-size:20px;margin:16px 0;color:#2B2A3D;font-family:'Quicksand',sans-serif;}
+#offline-screen .card p{font-size:14px;color:#555;margin:16px 0;}
+#offline-screen .card .btn-primary{background:#FF6B00;color:#fff;border:none;padding:12px 24px;border-radius:9999px;font-size:15px;font-family:'Quicksand',sans-serif;margin:8px 0;cursor:pointer;}
+#offline-screen .card .btn-secondary{background:#fff;color:#FF6B00;border:2px solid #FF6B00;padding:12px 24px;border-radius:9999px;font-size:15px;font-family:'Quicksand',sans-serif;margin:8px 0;cursor:pointer;}
+
+  
+  /* ── Auth split-screen ── */
+  #auth-screen{display:flex;min-height:100vh;background:#FBFAF8;align-items:center;justify-content:center;gap:64px;padding:48px;}
+  [data-theme="dark"] #auth-screen{background:var(--bg);}
+
+  /* ---------- Coluna esquerda: marca, headline, mascote ---------- */
+  .auth-left{flex:0 0 480px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1;}
+  [data-theme="dark"] .auth-left{display:none;}
+
+  .auth-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:56px;}
+  .auth-logo-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .auth-logo-icon img{width:40px;height:40px;object-fit:contain;}
+  .auth-logo-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#16151F;letter-spacing:.2px;}
+
+  .auth-heading{font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;color:#16151F;margin-bottom:18px;line-height:1.18;}
+  .auth-heading .accent{color:#FF7A00;}
+  .auth-sub{font-size:15px;color:#8B889C;margin-bottom:40px;line-height:1.6;max-width:360px;}
+
+  .auth-mascot-wrap{position:relative;margin-top:8px;width:340px;height:340px;}
+  .auth-mascot-glow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,0,0.16) 0%,rgba(255,140,0,0) 72%);bottom:-30px;left:20px;}
+  .auth-mascot-img{position:relative;z-index:2;width:300px;height:300px;object-fit:contain;filter:drop-shadow(0 24px 40px rgba(40,30,10,0.18));animation:float 3.4s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+  /* ---------- Coluna direita: card de login ---------- */
+  .auth-right{flex:0 0 480px;}
+  .auth-card{background:#fff;border-radius:24px;padding:48px 44px;box-shadow:0 2px 8px rgba(40,30,10,0.04),0 24px 64px rgba(40,30,10,0.08);border:1px solid #F1EEE7;}
+  [data-theme="dark"] .auth-card{background:var(--card);border-color:var(--line);box-shadow:0 24px 64px rgba(0,0,0,0.35);}
+
+  .auth-card-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#16151F;margin-bottom:8px;line-height:1.25;}
+  [data-theme="dark"] .auth-card-title{color:var(--ink);}
+  .auth-card-sub{font-size:14px;color:#9B98AB;margin-bottom:32px;line-height:1.5;}
+  .auth-card-sub .accent{color:#FF7A00;font-weight:700;}
+
+  .field{margin-bottom:18px;text-align:left;}
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:#16151F;}
+  [data-theme="dark"] .field label{color:var(--ink);}
+  .field input,.field select{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E5E1D8;font-size:14px;font-family:inherit;transition:border-color .15s, box-shadow .15s;color:#16151F;background:#fff;}
+  .field input:focus,.field select:focus{outline:none;border-color:#FF7A00;box-shadow:0 0 0 4px rgba(255,122,0,0.12);}
+  .field input::placeholder{color:#B5B1C2;}
+  [data-theme="dark"] .field input,[data-theme="dark"] .field select{background:#fff;color:#16151F;border-color:#E5E1D8;}
+  [data-theme="dark"] .field input::placeholder{color:#B5B1C2;}
+
+  .btn{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(180deg,#FF9433 0%,#FF7A00 55%,#F06A00 100%);color:#fff;font-weight:700;font-family:'Quicksand',sans-serif;font-size:15px;cursor:pointer;transition:transform .12s, box-shadow .12s, filter .12s;box-shadow:0 1px 0 rgba(255,255,255,0.35) inset,0 -3px 0 rgba(180,70,0,0.35) inset,0 10px 24px rgba(255,110,0,0.35);}
+  .btn:hover{filter:brightness(1.04);transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,0.35) inset,0 -3px 0 rgba(180,70,0,0.35) inset,0 14px 30px rgba(255,110,0,0.42);}
+  .btn:active{transform:translateY(0);box-shadow:0 1px 0 rgba(255,255,255,0.25) inset,0 -1px 0 rgba(180,70,0,0.3) inset,0 6px 14px rgba(255,110,0,0.3);}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  .auth-divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:#B5B1C2;font-size:12px;font-weight:600;}
+  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#EDEAE0;}
+  [data-theme="dark"] .auth-divider::before,[data-theme="dark"] .auth-divider::after{background:var(--line);}
+
+  .btn-social{width:100%;padding:13px 16px;border:1.5px solid #E5E1D8;border-radius:12px;background:#fff;font-size:14px;font-weight:600;color:#16151F;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:border-color .15s, box-shadow .15s, transform .12s;font-family:'Nunito Sans',sans-serif;box-shadow:0 1px 0 rgba(255,255,255,0.6) inset,0 4px 10px rgba(40,30,10,0.06);}
+  .btn-social:hover{border-color:#FF7A00;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,0.6) inset,0 8px 18px rgba(40,30,10,0.1);}
+  .btn-social:active{transform:translateY(0);box-shadow:0 1px 0 rgba(255,255,255,0.4) inset,0 2px 6px rgba(40,30,10,0.08);}
+  .btn-social svg{flex-shrink:0;}
+  [data-theme="dark"] .btn-social{background:#fff;color:#16151F;border-color:#E5E1D8;}
+
+  .btn-ghost{background:none;border:none;color:#FF7A00;font-weight:600;font-size:13px;cursor:pointer;margin-top:4px;font-family:inherit;}
+  .btn-ghost:hover{text-decoration:underline;}
+  .error-msg{background:#FFF0F0;color:#C0392B;border-radius:10px;padding:9px 13px;font-size:13px;margin-bottom:12px;display:none;border:1px solid #FADADA;}
+  .loading{display:none;text-align:center;color:#9B98AB;font-size:13px;margin-bottom:12px;}
+  .auth-footer{margin-top:28px;font-size:12px;color:#B5B1C2;line-height:1.5;text-align:center;}
+  .auth-footer a{color:#FF7A00;text-decoration:none;font-weight:600;transition:color 0.15s;}
+  .auth-footer a:hover{text-decoration:underline;color:#E55A00;}
+  [data-theme="dark"] .auth-footer a:hover{color:#FFA040;}
+  .auth-toggle-wrap{text-align:center;margin-top:22px;font-size:13px;color:#8B889C;}
+  [data-theme="dark"] .auth-toggle-wrap{color:var(--muted);}
+
+  @media(max-width:900px){
+    #auth-screen{flex-direction:column;padding:32px 20px;gap:32px;}
+    .auth-left{flex:none;width:100%;align-items:center;text-align:center;}
+    .auth-logo-row{justify-content:center;}
+    .auth-sub{margin-left:auto;margin-right:auto;}
+    .auth-mascot-wrap{display:none;}
+    .auth-right{flex:none;width:100%;max-width:420px;}
+    .auth-card{padding:36px 28px;}
+  }
+  
+  /* ── App ── */
+  #app{display:none;max-width:1040px;margin:0 auto;padding:28px 20px;}
+
+  /* H: Topbar com avatar do usuário */
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;}
+  .topbar h1{font-size:20px;}
+  .topbar .greeting{font-size:13px;color:var(--muted);}
+  
+  /* H: Avatar dropdown */
+  .user-menu{position:relative;}
+  .user-avatar-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FF8C00,#E55A00);border:none;cursor:pointer;font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(255,110,0,0.30);transition:transform .15s,box-shadow .15s;}
+  .user-avatar-btn:hover{transform:scale(1.06);box-shadow:0 5px 16px rgba(255,110,0,0.40);}
+  .user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);border:1px solid var(--line);min-width:160px;overflow:hidden;opacity:0;transform:translateY(-8px) scale(0.95);pointer-events:none;transition:opacity .15s ease, transform .15s ease;z-index:200;}
+  .user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+  .user-dropdown a,.user-dropdown button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;color:var(--ink);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .12s;}
+  .user-dropdown a:hover,.user-dropdown button:hover{background:var(--bg);}
+  .user-dropdown .dd-divider{height:1px;background:var(--line);margin:2px 0;}
+  .user-dropdown .dd-logout{color:var(--red);}
+
+  .layout{display:grid;grid-template-columns:240px 1fr;gap:24px;}
+  @media (max-width:760px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 6px 24px rgba(124,111,224,0.06);}
+  .panel h2{font-size:16px;margin-bottom:14px;}
+  
+  /* K: Skeleton loading */
+  .skeleton{background:linear-gradient(90deg,#f0eef8 25%,#e8e4f5 50%,#f0eef8 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:10px;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+  .skeleton-child{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;}
+  .skeleton-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;}
+  .skeleton-lines{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .skeleton-line{height:10px;border-radius:6px;}
+  .skeleton-line.short{width:60%;}
+  .skeleton-task{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .skeleton-circle{width:40px;height:40px;border-radius:50%;flex-shrink:0;}
+  .skeleton-info{flex:1;display:flex;flex-direction:column;gap:7px;}
+  .skeleton-info .s1{height:16px;width:50%;border-radius:6px;}
+  .skeleton-info .s2{height:11px;width:70%;border-radius:6px;}
+  .skeleton-info .s3{height:9px;width:40%;border-radius:6px;}
+  
+  .child-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;font-size:14px;margin-bottom:6px;transition:background .15s;border-left:4px solid transparent;cursor:pointer;}
+  .child-item:hover{background:var(--bg);}
+  .child-item.active{border-left-color:var(--child-color,var(--orange));background:color-mix(in srgb,var(--child-color,var(--orange)) 12%,transparent);}
+  .child-item .child-info{flex:1;min-width:0;overflow:hidden;}
+  .child-item .child-info .child-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+  .child-item.active .child-info .child-name{color:var(--child-color,var(--orange));}
+  .child-item small{display:block;font-size:11px;color:var(--muted);margin-top:1px;}
+  .child-delete-btn{border:none;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;}
+  .child-item:hover .child-delete-btn{opacity:1;}
+  .child-delete-btn:hover{color:var(--red)!important;opacity:1!important;}
+  .add-child-btn{width:100%;margin-top:12px;padding:9px;border:1.5px dashed var(--line);border-radius:10px;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:inherit;}
+  .add-child-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .color-opt{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s;}
+  .color-opt.active{border-color:#fff;box-shadow:0 0 0 2px var(--ink);transform:scale(1.15);}
+  .child-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  
+  /* F: View toggle Hoje / Semana */
+  .routine-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+  .routine-header p{font-size:13px;color:var(--muted);margin-top:2px;}
+  .view-toggle{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:2px;flex-shrink:0;}
+  .view-toggle button{padding:6px 14px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted);background:transparent;transition:background .15s,color .15s;}
+  .view-toggle button.active{background:#fff;color:var(--orange);box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+  
+  /* F: Next task highlight */
+  .next-task-card{border-radius:16px;padding:16px 18px;margin-bottom:16px;background:linear-gradient(135deg,var(--child-color,var(--orange)) 0%,color-mix(in srgb,var(--child-color,var(--orange)) 70%,#000) 100%);color:#fff;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;}
+  .next-task-card::before{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.10);}
+  .next-task-card .ntc-icon{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+  .next-task-card .ntc-info{flex:1;}
+  .next-task-card .ntc-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.75;margin-bottom:2px;}
+  .next-task-card .ntc-time{font-size:32px;font-weight:700;font-family:'Quicksand',sans-serif;line-height:1;}
+  .next-task-card .ntc-name{font-size:14px;opacity:.85;margin-top:3px;}
+  .no-tasks-today{text-align:center;padding:32px 16px;color:var(--muted);}
+  .no-tasks-today .icon{font-size:40px;margin-bottom:10px;}
+  .no-tasks-today p{font-size:14px;}
+
+  .day-toggle{display:flex;gap:6px;margin:10px 0 16px;}
+  .day-toggle button{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+  .day-toggle button.on{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .task-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+
+  /* I: Task card + animations */
+  .task-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);transition:box-shadow .2s, border-color .2s, transform .2s;}
+  .task-card:hover{box-shadow:0 6px 20px rgba(124,111,224,0.08); border-color: color-mix(in srgb, var(--line) 70%, var(--ink)); transform: translateY(-2px);}
+  .task-card.entering{animation:taskEnter .3s ease forwards;}
+  .task-card.leaving{animation:taskLeave .25s ease forwards;}
+  @keyframes taskEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes taskLeave{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(0.95);}}
+  .task-heart{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+  .task-heart.blue{background:var(--blue);}
+  .task-heart.green{background:var(--green);}
+  .task-heart.purple{background:var(--purple);}
+  .task-heart.yellow{background:var(--yellow);}
+  .task-info{flex:1;}
+  .task-info .t-hour{font-size:18px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .task-info .t-name{font-size:13px;color:var(--muted);margin-top:2px;}
+  .task-days{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+  .task-day-pill{font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--line);}
+  .task-day-pill.today{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .task-actions{display:flex;align-items:center;gap:2px;}
+  .task-actions button{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:4px 6px;border-radius:8px;transition:background-color .15s,color .15s;}
+  .task-actions button[data-action="edit"]:hover{color:var(--orange);background:rgba(255,122,0,0.1);}
+  .task-actions button[data-action="delete"]:hover{color:#C0392B;background:rgba(231,76,60,0.1);}
+
+  /* G: Add task button */
+  .add-task-btn-wrap{border-top:1px dashed var(--line);padding-top:16px;}
+  .add-task-floating{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px dashed var(--line);border-radius:12px;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;transition:border-color .15s,color .15s,background .15s;}
+  .add-task-floating:hover{border-color:var(--orange);color:var(--orange);background:#FFF8F2;}
+  .add-task-floating .atf-icon{width:32px;height:32px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .15s;}
+  .add-task-floating:hover .atf-icon{background:#FFE8D0;}
+
+  /* ── Modais Genéricos (Nova Criança, Nova Tarefa, Perfil, MFA, Confirmação, Legal) ── */
+  #modal-task, #modal-confirm, #modal-profile, #modal-mfa, #modal-child, #modal-legal, #modal-copy-routine {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  #modal-task { z-index: 2500; }
+  #modal-profile { z-index: 2500; }
+  #modal-child { z-index: 2000; }
+  #modal-confirm { z-index: 3000; }
+  #modal-copy-routine { z-index: 3000; }
+  #modal-mfa { z-index: 3000; }
+  #modal-legal { z-index: 3500; }
+
+  #modal-task.open, #modal-confirm.open, #modal-profile.open, #modal-mfa.open, #modal-child.open, #modal-legal.open, #modal-copy-routine.open {
+    display: flex;
+  }
+  
+  @keyframes modalScaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  #modal-task.open .modal-task-box,
+  #modal-confirm.open .modal-confirm-box,
+  #modal-copy-routine.open .modal-confirm-box,
+  #modal-profile.open .profile-box,
+  #modal-mfa.open .mfa-box,
+  #modal-child.open > div,
+  #modal-legal.open > div {
+    animation: modalScaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .btn-modal-cancel, .btn-cancel-modal, #nc-cancel {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .btn-modal-cancel:hover, .btn-cancel-modal:hover, #nc-cancel:hover {
+    border-color: var(--muted);
+    background: var(--bg);
+  }
+
+  /* G: Modal Nova Tarefa */
+  .modal-task-box{background:var(--card);border-radius:20px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+  .modal-task-box h2{font-size:18px;margin-bottom:20px;font-family:'Quicksand',sans-serif;}
+  .modal-task-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px;}
+  .emoji-grid button{background:var(--bg);border:2px solid transparent;border-radius:8px;font-size:18px;padding:5px;cursor:pointer;transition:border-color .12s,transform .12s;line-height:1;}
+  .emoji-grid button:hover{border-color:var(--line);transform:scale(1.1);}
+  .emoji-grid button.selected{border-color:var(--orange);background:#FFF0E0;}
+  .modal-task-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+  .modal-task-days button{flex:1;min-width:36px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .12s;font-family:inherit;}
+  .modal-task-days button.on{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+
+  #app .btn{background:linear-gradient(135deg,#FF8C00,#FF6000);box-shadow:0 4px 14px rgba(255,110,0,0.30);}
+  
+  .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+  .empty-state .icon{font-size:64px;margin-bottom:16px;}
+  .empty-state h3{font-size:20px;color:var(--ink);margin-bottom:8px;}
+  .empty-state p{font-size:14px;margin-bottom:24px;}
+
+  /* E: Toast */
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#2B2A3D;color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,0.25);opacity:0;transition:opacity .25s,transform .25s;z-index:9000;pointer-events:none;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
+  #toast-undo{background:none;border:none;color:var(--orange);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;padding:0;}
+  .modal-confirm-box{background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .modal-confirm-box h3{font-family:'Quicksand',sans-serif;font-size:18px;margin-bottom:8px;}
+  .modal-confirm-box p{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .modal-confirm-actions{display:flex;gap:10px;}
+  .btn-danger{flex:1;padding:12px;border:none;border-radius:12px;background:var(--red);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:'Quicksand',sans-serif;}
+
+  /* ── Profile Panel ── */
+  .profile-box{background:var(--card);border-radius:24px;width:100%;max-width:440px;box-shadow:0 24px 72px rgba(0,0,0,0.22);overflow:hidden;max-height:90vh;overflow-y:auto;}
+  .profile-header{background:linear-gradient(135deg,#FF8C00,#E55A00);padding:32px 28px 48px;text-align:center;position:relative;}
+  .profile-header h2{color:#fff;font-size:18px;font-family:'Quicksand',sans-serif;margin-bottom:0;}
+  .profile-header .ph-close{position:absolute;top:16px;right:18px;background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+  .profile-header .ph-close:hover{background:rgba(255,255,255,0.35);}
+  .avatar-upload-wrap{margin:0 auto;width:96px;height:96px;position:relative;margin-top:-48px;margin-bottom:20px;}
+  .avatar-preview{width:96px;height:96px;border-radius:50%;border:4px solid var(--card);object-fit:cover;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#fff;font-family:'Quicksand',sans-serif;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.18);}
+  .avatar-preview img{width:100%;height:100%;object-fit:cover;}
+  .avatar-upload-btn{position:absolute;bottom:2px;right:2px;width:28px;height:28px;border-radius:50%;background:var(--card);border:2px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:border-color .15s;overflow:hidden;}
+  .avatar-upload-btn:hover{border-color:var(--orange);}
+  .avatar-upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .profile-body{padding:8px 28px 28px;}
+  .profile-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px;margin-top:18px;}
+  .profile-section-title:first-child{margin-top:0;}
+  .mfa-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;margin-bottom:12px;}
+  .mfa-status.off{background:#FFF0F0;color:#C0392B;}
+  .mfa-status.on{background:#E8F8F0;color:#1E8449;}
+  .mfa-actions{display:flex;flex-direction:column;gap:10px;}
+  .btn-mfa{padding:11px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn-mfa:hover{border-color:var(--orange);}
+  .btn-mfa.danger{border-color:#FADADA;color:#C0392B;}
+  .mfa-box{background:var(--card);border-radius:20px;padding:28px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .mfa-box h3{font-size:18px;margin-bottom:8px;}
+  .mfa-box p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+  .theme-opts{display:flex;gap:8px;}
+  .theme-opt{flex:1;padding:10px 8px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .15s,background .15s;}
+  .theme-opt:hover{border-color:var(--orange);}
+  .theme-opt.active{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 8%,transparent);}
+  .theme-opt .to-icon{width:36px;height:22px;border-radius:5px;border:1.5px solid var(--line);}
+  .theme-opt[data-t="light"] .to-icon{background:#F6F4FB;}
+  .theme-opt[data-t="dark"] .to-icon{background:#1A1928;}
+  .theme-opt[data-t="system"] .to-icon{background:linear-gradient(90deg,#F6F4FB 50%,#1A1928 50%);}
+  .child-avatar-upload{display:flex;align-items:center;gap:14px;margin-top:6px;}
+  .child-avatar-preview{width:52px;height:52px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;}
+  .child-avatar-preview img{width:100%;height:100%;object-fit:cover;}
+  .child-avatar-actions{display:flex;flex-direction:column;gap:6px;}
+  .btn-upload-child{padding:6px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;position:relative;overflow:hidden;transition:border-color .15s;}
+  .btn-upload-child:hover{border-color:var(--orange);}
+  .btn-upload-child input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .btn-clear-child-photo{padding:5px 14px;border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;}
+  .btn-clear-child-photo:hover{color:var(--red);}
+
+  /* ── UTOME Gen 1 — Dispositivo ── */
+  .device-section{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;}
+  .device-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px;}
+
+  /* Card sem dispositivo */
+  .device-empty{text-align:center;padding:20px 12px;}
+  .device-empty .de-icon{width:52px;height:52px;border-radius:16px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:26px;}
+  .device-empty p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+  .btn-pair-device{width:100%;padding:9px;border:1.5px dashed var(--orange);border-radius:10px;background:none;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit;}
+  .btn-pair-device:hover{background:rgba(255,122,0,0.07);}
+
+  /* Card com dispositivo */
+  .device-card{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);}
+  .device-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .device-icon-wrap{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+  .device-name{font-weight:700;font-size:14px;color:var(--ink);}
+  .device-status-row{display:flex;align-items:center;gap:6px;margin-top:2px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .status-dot.online{background:#5FCBA3;box-shadow:0 0 0 2px rgba(95,203,163,0.3);}
+  .status-dot.offline{background:var(--muted);}
+  .status-label{font-size:11px;color:var(--muted);}
+  .device-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+  .device-metric{background:var(--bg);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
+  .dm-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+  .dm-value{font-size:14px;font-weight:700;color:var(--ink);font-family:'Quicksand',sans-serif;}
+  .battery-bar{height:4px;border-radius:2px;background:var(--line);margin-top:4px;overflow:hidden;}
+  .battery-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;}
+  .battery-fill.low{background:var(--red);}
+  .battery-fill.mid{background:var(--yellow);}
+  .device-actions{display:flex;gap:6px;margin-top:10px;}
+  .btn-device-sm{flex:1;padding:7px;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+  .btn-device-sm:hover{border-color:var(--orange);color:var(--orange);}
+  .btn-device-sm.danger:hover{border-color:var(--red);color:var(--red);}
+
+  /* Modal de pareamento */
+  .pair-box{background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;}
+  .pair-box h3{font-size:18px;margin-bottom:8px;font-family:'Quicksand',sans-serif;}
+  .pair-box .pair-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .pair-code-wrap{background:var(--bg);border-radius:14px;padding:20px;margin-bottom:16px;}
+  .pair-code{font-family:'Quicksand',sans-serif;font-size:28px;font-weight:700;letter-spacing:3px;color:var(--orange);word-break:break-all;}
+  .pair-code-note{font-size:11px;color:var(--muted);margin-top:6px;}
+  .pair-timer{font-size:12px;color:var(--muted);margin-bottom:20px;}
+  .pair-timer strong{color:var(--ink);}
+  .pair-actions{display:flex;gap:10px;}
+
+  /* Dashboard — widget de dispositivo */
+  #device-dashboard-widget{display:none;}
+  .device-dash-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border-radius:12px;margin-top:10px;}
+  .device-dash-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .device-dash-info{flex:1;min-width:0;}
+  .device-dash-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .device-dash-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+  .device-dash-battery{font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;}
+
+  [data-theme="dark"] .device-card{background:var(--card);}
+  [data-theme="dark"] .pair-box{background:var(--card);}
+</style>
+</head>
+<body>
+  <!-- Offline full-screen modal -->
+  <div id="offline-screen">
+    <div class="card">
+      <!-- Simple line illustration of two disconnected plugs -->
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 24L24 12" stroke="#000" stroke-width="2"/>
+        <path d="M24 12H16V4" stroke="#000" stroke-width="2"/>
+        <path d="M24 12H32V4" stroke="#000" stroke-width="2"/>
+        <path d="M52 24L40 12" stroke="#000" stroke-width="2"/>
+        <path d="M40 12H48V4" stroke="#000" stroke-width="2"/>
+        <path d="M40 12H32V4" stroke="#000" stroke-width="2"/>
+        <line x1="12" y1="52" x2="52" y2="12" stroke="#000" stroke-width="2"/>
+      </svg>
+      <h1>OFFLINE</h1>
+      <h2>Você está sem conexão com a internet</h2>
+      <p>Não foi possível conectar aos nossos servidores. Verifique sua conexão e tente novamente. Alguns recursos podem estar indisponíveis enquanto você estiver offline.</p>
+      <button class="btn-primary" id="btn-retry">Tentar Novamente</button>
+      <button class="btn-secondary" id="btn-offline-mode">Modo Offline</button>
+    </div>
+  </div>
+
+<div id="splash">
+  <div class="splash-logo">
+    <img src="utome.png" class="splash-logo" alt="UTOME logo">
+  </div>
+  <div class="splash-text">UTOME</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<div id="offline-banner"><span class="ei"><img src="https://img.icons8.com/ios-filled/16/FFFFFF/Offline.png" alt="offline" width="16" height="16"/></span> Você está offline. Alguns recursos podem não estar disponíveis.</div>
+
+<!-- J: Onboarding com identidade visual UTOME -->
+<div id="onboarding">
+  <div class="onboarding-screen active" data-step="0">
+    <div class="onboarding-visual">
+      <svg width="160" height="160" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation:float 3s ease-in-out infinite;">
+        <path d="M110 20 C155 15, 200 45, 205 90 C212 140, 190 185, 145 200 C110 212, 65 205, 38 175 C10 145, 12 95, 35 62 C55 32, 75 24, 110 20Z" fill="url(#og1)"/>
+        <ellipse cx="80" cy="32" rx="22" ry="28" fill="url(#og1)" transform="rotate(-25 80 32)"/>
+        <ellipse cx="115" cy="22" rx="20" ry="26" fill="url(#og1)" transform="rotate(-5 115 22)"/>
+        <ellipse cx="148" cy="30" rx="18" ry="24" fill="url(#og1)" transform="rotate(20 148 30)"/>
+        <rect x="82" y="105" width="14" height="52" rx="7" fill="white"/>
+        <path d="M116 108 L140 131 L116 154" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <defs><linearGradient id="og1" x1="30" y1="20" x2="190" y2="210" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFA040"/><stop offset="100%" stop-color="#E55A00"/></linearGradient></defs>
+      </svg>
+    </div>
+    <h1>Bem-vindo ao UTOME</h1>
+    <p>A rotina da criança organizada e visível em tempo real, direto no relógio inteligente.</p>
+  </div>
+  
+  <div class="onboarding-screen" data-step="1">
+    <div class="onboarding-visual">
+      <svg width="160" height="160" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="80" fill="#FFF3E8"/>
+        <circle cx="100" cy="100" r="60" fill="#FFE0C0"/>
+        <!-- SVG child face -->
+        <circle cx="100" cy="95" r="32" fill="#FFCB9A"/>
+        <circle cx="88" cy="89" r="4" fill="#3D2B1F"/>
+        <circle cx="112" cy="89" r="4" fill="#3D2B1F"/>
+        <path d="M90 103 Q100 113 110 103" stroke="#3D2B1F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Hair -->
+        <path d="M70 88 Q72 64 100 62 Q128 64 130 88" fill="#5C3D1E"/>
+        <circle cx="148" cy="52" r="22" fill="url(#og2)"/>
+        <path d="M140 52 L146 58 L157 47" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="og2" x1="126" y1="30" x2="170" y2="74" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFA040"/><stop offset="100%" stop-color="#E55A00"/></linearGradient></defs>
+      </svg>
+    </div>
+    <h1>Um perfil por criança</h1>
+    <p>Cada criança tem seu avatar, cor e lista de tarefas. O relógio mostra as atividades dela automaticamente.</p>
+  </div>
+  
+  <div class="onboarding-screen" data-step="2">
+    <div class="onboarding-visual">
+      <svg width="160" height="160" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="40" width="140" height="130" rx="16" fill="#FFF3E8"/>
+        <rect x="46" y="76" width="108" height="14" rx="7" fill="url(#og3)" opacity=".9"/>
+        <rect x="46" y="100" width="80" height="10" rx="5" fill="#FFD0A0" opacity=".7"/>
+        <rect x="46" y="120" width="95" height="10" rx="5" fill="#FFD0A0" opacity=".5"/>
+        <rect x="46" y="140" width="60" height="10" rx="5" fill="#FFD0A0" opacity=".4"/>
+        <rect x="72" y="20" width="56" height="30" rx="8" fill="url(#og3)"/>
+        <rect x="88" y="28" width="24" height="4" rx="2" fill="white"/>
+        <rect x="84" y="38" width="32" height="4" rx="2" fill="white" opacity=".7"/>
+        <defs><linearGradient id="og3" x1="30" y1="40" x2="170" y2="170" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFA040"/><stop offset="100%" stop-color="#E55A00"/></linearGradient></defs>
+      </svg>
+    </div>
+    <h1>Tarefas com horário real</h1>
+    <p>Defina horários, emojis e dias da semana. O relógio do seu filho mostra a próxima tarefa automaticamente.</p>
+  </div>
+  
+  <div class="onboarding-nav">
+    <button class="active" onclick="goOnboarding(0)"></button>
+    <button onclick="goOnboarding(1)"></button>
+    <button onclick="goOnboarding(2)"></button>
+  </div>
+  
+  <div style="position:fixed;bottom:36px;right:36px;">
+    <button class="onboarding-btn" onclick="skipOnboarding()">Começar</button>
+  </div>
+</div>
+
+<div id="auth-screen">
+  <div class="auth-left">
+    <div class="auth-logo-row">
+      <div class="auth-logo-icon"><img src="utome.png" alt="UTOME logo"></div>
+      <span class="auth-logo-name">utome</span>
+    </div>
+
+    <h1 class="auth-heading">Automação <span class="accent">inteligente</span> para crescer sem limites.</h1>
+    <p class="auth-sub">A plataforma completa para automatizar, integrar e escalar seus negócios.</p>
+
+    <div class="auth-mascot-wrap">
+      <div class="auth-mascot-glow"></div>
+      <img src="utome.png" alt="Mascote UTOME" class="auth-mascot-img">
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <h2 class="auth-card-title" id="auth-title">Bem-vindo de volta! 👋</h2>
+      <p class="auth-card-sub" id="auth-subtitle">Faça login e continue sua jornada com a <span class="accent">utome</span>.</p>
+
+      <div class="loading" id="auth-loading">Conectando...</div>
+      <div class="error-msg" id="auth-error"></div>
+
+      <div id="register-fields" style="display:none;">
+        <div class="field">
+          <label>Seu nome</label>
+          <input type="text" id="reg-name" placeholder="Nome do responsável">
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="voce@email.com">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="auth-password" placeholder="••••••••" minlength="8" autocomplete="current-password">
+      </div>
+      <button class="btn" id="auth-submit">Continuar</button>
+
+      <div class="auth-divider">OU</div>
+
+      <button class="btn-social" id="btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continuar com Google
+      </button>
+
+      <button class="btn-social" id="btn-apple">
+        <svg width="18" height="18" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.3-155.5-127.4C46.7 790.7 0 663 0 541.8c0-207.5 135.4-317.3 269-317.3 70.1 0 128.4 46.4 172.5 46.4 42.8 0 109.9-49.2 190.5-49.2zm-218.5-70.1c-31.1-36.9-53.3-88.1-53.3-139.3 0-7.1.6-14.3 1.9-20.1 50.6 1.9 110.4 33.7 147.3 75.6 28.5 32.4 55.1 83.6 55.1 135.5 0 6.5-.6 13-1.3 18.8-4.2.6-11.1 1.3-18.1 1.3-45.2 0-102.1-30.4-131.6-71.8z"/></svg>
+        Continuar com Apple
+      </button>
+
+      <div class="auth-toggle-wrap">
+        <button class="btn-ghost" id="auth-toggle">Não tem conta? Cadastre-se</button>
+      </div>
+      <p class="auth-footer">Ao continuar, você concorda com os<br><a href="#" id="open-terms">Termos de Serviço</a> e <a href="#" id="open-privacy">Política de Privacidade</a> do UTOME.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nova Criança -->
+<div id="modal-child">
+  <div style="background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <h2 style="font-size:18px;margin-bottom:20px;font-family:'Quicksand',sans-serif;color:var(--ink);">Nova Criança</h2>
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="nc-name" placeholder="Ex: Sofia">
+    </div>
+    <div class="field">
+      <label>Foto ou Emoji</label>
+      <div class="child-avatar-upload">
+        <div class="child-avatar-preview" id="nc-avatar-preview">🧒</div>
+        <div class="child-avatar-actions">
+          <label class="btn-upload-child">
+            <span class="ei" style="margin-right:5px;"><img src="https://img.icons8.com/ios-filled/14/2B2A3D/upload.png" id="nc-upload-icon" width="14" height="14"></span>
+            Enviar foto
+            <input type="file" id="nc-photo-upload" accept="image/jpeg,image/png,image/webp">
+          </label>
+          <button class="btn-clear-child-photo" id="nc-clear-photo" style="display:none;">Remover foto</button>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+            <input type="text" id="nc-avatar" value="🧒" maxlength="2" style="width:42px;font-size:20px;text-align:center;border:1.5px solid var(--line);border-radius:8px;padding:4px;background:var(--bg);color:var(--ink);">
+            <span style="font-size:12px;color:var(--muted);">ou emoji</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Idade</label>
+      <input type="number" id="nc-age" placeholder="Ex: 7" min="1" max="17">
+    </div>
+    <div class="field">
+      <label>Cor favorita</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="nc-color-picker">
+        <button class="color-opt active" data-color="#FF7A00" style="background:#FF7A00;"></button>
+        <button class="color-opt" data-color="#7C6FE0" style="background:#7C6FE0;"></button>
+        <button class="color-opt" data-color="#5FCBA3" style="background:#5FCBA3;"></button>
+        <button class="color-opt" data-color="#E0726F" style="background:#E0726F;"></button>
+        <button class="color-opt" data-color="#6FA8E0" style="background:#6FA8E0;"></button>
+        <button class="color-opt" data-color="#F0C674" style="background:#F0C674;"></button>
+        <button class="color-opt" data-color="#B68CE0" style="background:#B68CE0;"></button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn" id="nc-save" style="flex:1;">Salvar</button>
+      <button id="nc-cancel" style="flex:0 0 auto;padding:12px 20px;border:1.5px solid var(--line);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- G: Modal Nova Tarefa -->
+<div id="modal-task">
+  <div class="modal-task-box">
+    <h2 id="task-modal-title">Nova Tarefa</h2>
+    <div class="modal-task-row">
+      <div class="field">
+        <label>Hora</label>
+        <input type="time" id="nt-time" value="08:00">
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="nt-color"></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Nome da tarefa</label>
+      <input type="text" id="nt-name" placeholder="Ex: Escovar dentes">
+    </div>
+    <div class="field">
+      <label>Emoji</label>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+    <div class="field">
+      <label>Dias da semana</label>
+      <div class="modal-task-days" id="nt-days"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="nt-save" style="flex:1;">Adicionar tarefa</button>
+      <button class="btn-modal-cancel" id="nt-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Perfil do Responsável -->
+<div id="modal-profile">
+  <div class="profile-box">
+    <div class="profile-header">
+      <h2>Meu Perfil</h2>
+      <button class="ph-close" id="profile-close">×</button>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <div class="avatar-upload-wrap">
+        <div class="avatar-preview" id="profile-avatar-preview"></div>
+        <label class="avatar-upload-btn" title="Trocar foto">
+          <span class="ei"><img src="https://img.icons8.com/ios-filled/14/2B2A3D/camera.png" id="profile-cam-icon" width="14" height="14"></span>
+          <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+        </label>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-section-title">Informações pessoais</div>
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="profile-name" placeholder="Seu nome completo">
+      </div>
+      <div class="field">
+        <label>Como o UTOME te chama</label>
+        <input type="text" id="profile-nick" placeholder="Ex: Mamãe, João, Pai">
+      </div>
+      <div class="profile-section-title">Segurança da conta</div>
+      <div id="mfa-status-badge" class="mfa-status off">2FA: desativado</div>
+      <div class="mfa-actions">
+        <div class="field" id="mfa-enroll-fields" style="margin-bottom:0;">
+          <label>Telefone (SMS para 2FA)</label>
+          <input type="tel" id="mfa-phone" placeholder="+55 11 99999-9999">
+        </div>
+        <button type="button" class="btn-mfa" id="mfa-enable-btn">Ativar verificação em 2 etapas</button>
+        <button type="button" class="btn-mfa danger" id="mfa-disable-btn" style="display:none;">Desativar 2FA</button>
+      </div>
+      <div class="profile-section-title">Aparência</div>
+      <div class="theme-opts">
+        <button class="theme-opt active" data-t="light">
+          <div class="to-icon"></div>
+          Claro
+        </button>
+        <button class="theme-opt" data-t="dark">
+          <div class="to-icon"></div>
+          Escuro
+        </button>
+        <button class="theme-opt" data-t="system">
+          <div class="to-icon"></div>
+          Sistema
+        </button>
+      </div>
+      <div style="margin-top:24px;">
+        <button class="btn" id="profile-save">Salvar alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E: Toast de undo -->
+<div id="toast">
+  <span id="toast-msg"></span>
+  <button id="toast-undo">Desfazer</button>
+</div>
+
+<!-- E: Modal de confirmação -->
+<div id="modal-confirm">
+  <div class="modal-confirm-box">
+    <h3 id="modal-confirm-title"></h3>
+    <p id="modal-confirm-text"></p>
+    <div class="modal-confirm-actions">
+      <button class="btn-cancel-modal" id="modal-confirm-cancel">Cancelar</button>
+      <button class="btn-danger" id="modal-confirm-ok">Remover</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Copiar rotina para outro(s) filho(s) -->
+<div id="modal-copy-routine">
+  <div class="modal-confirm-box" style="max-width:380px;text-align:left;">
+    <h3 style="margin-bottom:8px;">Copiar rotina</h3>
+    <p style="margin-bottom:16px;">Selecione para quem copiar as tarefas de <strong id="copy-routine-source-name"></strong>:</p>
+    <div id="copy-routine-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;max-height:240px;overflow-y:auto;"></div>
+    <div class="modal-confirm-actions">
+      <button class="btn-cancel-modal" id="copy-routine-cancel">Cancelar</button>
+      <button class="btn" id="copy-routine-confirm" style="background:linear-gradient(135deg,#FF8C00,#E55A00);">Copiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal MFA (login + enrollment) -->
+<div id="modal-mfa">
+  <div class="mfa-box">
+    <h3 id="mfa-modal-title">Verificação em 2 etapas</h3>
+    <p id="mfa-modal-desc">Digite o código SMS enviado ao seu telefone.</p>
+    <div class="field">
+      <label>Código de verificação</label>
+      <input type="text" id="mfa-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button type="button" class="btn-mfa" id="mfa-cancel" style="flex:1;">Cancelar</button>
+      <button type="button" class="btn" id="mfa-confirm" style="flex:1;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Documentos Legais -->
+<div id="modal-legal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:3500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);">
+  <div style="background:var(--card);border-radius:20px;padding:0;width:100%;max-width:640px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);">
+    <div style="background:linear-gradient(135deg,#FF8C00,#E55A00);padding:24px 28px;position:relative;color:#fff;flex-shrink:0;">
+      <h2 style="font-size:20px;font-family:'Quicksand',sans-serif;color:#fff;margin:0;">Termos e Políticas</h2>
+      <button id="legal-close" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s;border:none;">×</button>
+      
+      <!-- Tabs to toggle content -->
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button id="btn-tab-privacy" style="background:#fff;color:#E55A00;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit;">Política de Privacidade</button>
+        <button id="btn-tab-terms" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit;">Termos de Serviço</button>
+      </div>
+    </div>
+    
+    <div id="legal-body" style="padding:28px;overflow-y:auto;font-size:14px;line-height:1.6;color:var(--ink);flex-grow:1;">
+      <!-- Privacy Policy Content -->
+      <div id="content-privacy" style="display:block;">
+        <h3 style="margin-bottom:12px;font-family:'Quicksand';font-size:18px;">Política de Privacidade</h3>
+        <p style="margin-bottom:12px;font-size:11px;color:var(--muted);">Última atualização: 16 de junho de 2026</p>
+        <p style="margin-bottom:12px;">O <strong>UTOME</strong> tem o compromisso de proteger a privacidade e a segurança dos dados pessoais de seus usuários. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos as informações fornecidas por você (o "Responsável" ou "Usuário") e os dados referentes às crianças cadastradas na plataforma.</p>
+        <p style="margin-bottom:16px;">Ao utilizar o UTOME, você concorda com a coleta e o uso de informações de acordo com esta política, sob as leis brasileiras aplicáveis, em especial a <strong>Lei Geral de Proteção de Dados Pessoais (LGPD) - Lei nº 13.709/2018</strong>.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">1. Informações que Coletamos</h4>
+        <h5 style="font-weight:700;margin-bottom:4px;">A. Dados do Responsável (Titular da Conta)</h5>
+        <p style="margin-bottom:12px;">Coletamos nome completo, e-mail de cadastro, dados de login social (Google/Apple) e telefone celular (se ativada a verificação em duas etapas via SMS). Também coletamos logs de segurança (endereço IP aproximado, dados do navegador e logs de sessões).</p>
+        <h5 style="font-weight:700;margin-bottom:4px;">B. Dados da(s) Criança(s) (Inseridos pelo Responsável)</h5>
+        <p style="margin-bottom:12px;">Coletamos nome ou apelido, idade, foto de perfil (base64) ou emoji de preferência, cor favorita e tarefas de rotina (horários, descrição de atividades e status de conclusão).</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">2. Como Utilizamos as Informações</h4>
+        <p style="margin-bottom:12px;">Os dados são usados estritamente para a prestação do serviço de rotina infantil, sincronização com relógios e dispositivos, segurança da conta (prevenção de ataques cibernéticos por monitoramento de anomalias no audit log), envio de códigos de autenticação (SMS 2FA) e melhorias do software.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">3. Compartilhamento e Transferência</h4>
+        <p style="margin-bottom:12px;">Não vendemos dados. As informações são armazenadas de forma segura na infraestrutura de servidores do Google Firebase (banco de dados Firestore e Auth). A hospedagem do código é realizada na plataforma Vercel.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">4. Retenção e Exclusão</h4>
+        <p style="margin-bottom:12px;">Os dados das crianças são apagados imediatamente em cascata no Firestore caso a criança seja deletada. A conta e todos os dados associados podem ser completamente excluídos do sistema a qualquer momento pelo usuário.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">5. Consentimento para Menores</h4>
+        <p style="margin-bottom:12px;">Ao cadastrar uma criança no UTOME, você declara e garante sob as leis brasileiras ser o pai, mãe ou responsável legal e dá consentimento ativo e específico para o processamento de dados da criança.</p>
+      </div>
+      
+      <!-- Terms of Service Content -->
+      <div id="content-terms" style="display:none;">
+        <h3 style="margin-bottom:12px;font-family:'Quicksand';font-size:18px;">Termos de Serviço</h3>
+        <p style="margin-bottom:12px;font-size:11px;color:var(--muted);">Última atualização: 16 de junho de 2026</p>
+        <p style="margin-bottom:12px;">Bem-vindo ao <strong>UTOME</strong>! Ao criar uma conta ou utilizar os serviços do UTOME, você (o "Responsável") aceita e concorda em cumprir integralmente as disposições destes Termos de Serviço.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">1. Descrição do Serviço</h4>
+        <p style="margin-bottom:12px;">O UTOME é um software para gerenciamento e sincronização visual de rotinas diárias e tarefas para crianças. O aplicativo é fornecido "no estado em que se encontra" (as-is).</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">2. Cadastro e Contas</h4>
+        <p style="margin-bottom:12px;">Você deve possuir mais de 18 anos ou ser plenamente capaz sob a lei civil para criar uma conta. O sigilo de suas credenciais de acesso é de sua exclusiva responsabilidade.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">3. Uso Aceitável e Restrições</h4>
+        <p style="margin-bottom:12px;">É expressamente proibido burlar os mecanismos de segurança (logs de segurança, limites de upload, etc.), abusar do Rate Limiting, enviar scripts ou códigos automatizados maliciosos, ou extrair dados sem permissão (scraping).</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">4. Propriedade Intelectual</h4>
+        <p style="margin-bottom:12px;">O código-fonte, layout, marcas, mascotes e artes exclusivas do UTOME são protegidos por direitos autorais. O uso do app não transfere qualquer direito de comercialização ou cópia ao usuário.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">5. Limitação de Responsabilidade</h4>
+        <p style="margin-bottom:12px;">Não nos responsabilizamos por perdas decorrentes de instabilidades de redes externas, exclusões efetuadas manualmente pelo usuário, ou danos decorrentes do uso inadequado do aplicativo.</p>
+        
+        <h4 style="margin:16px 0 8px;font-family:'Quicksand';font-size:15px;color:var(--orange);">6. Foro e Legislação</h4>
+        <p style="margin-bottom:12px;">Estes termos são regidos pelas leis da República Federativa do Brasil, elegendo-se o foro do domicílio do usuário para a resolução de eventuais conflitos.</p>
+      </div>
+    </div>
+    
+    <div style="padding:16px 28px;background:var(--bg);border-top:1px solid var(--line);text-align:right;flex-shrink:0;">
+      <button id="legal-confirm" style="padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF8C00,#E55A00);color:#fff;font-weight:700;cursor:pointer;font-size:14px;font-family:'Quicksand',sans-serif;box-shadow:0 4px 12px rgba(255,110,0,0.25);">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Pareamento de dispositivo UTOME Gen 1 -->
+<div id="modal-pair" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);z-index:2500;">
+  <div class="pair-box">
+    <h3>Conectar UTOME Gen 1</h3>
+    <p class="pair-sub">Use este código temporário no seu dispositivo para vinculá-lo a <strong id="pair-child-name">esta criança</strong>.</p>
+    <div class="pair-code-wrap">
+      <div class="pair-code" id="pair-code-display">---</div>
+      <div class="pair-code-note">Insira este código no dispositivo UTOME</div>
+    </div>
+    <div class="pair-timer">Expira em: <strong id="pair-timer-display">10:00</strong></div>
+    <div class="pair-actions">
+      <button class="btn-modal-cancel" id="pair-modal-cancel" style="flex:1;">Fechar</button>
+      <button class="btn" id="pair-regen-btn" style="flex:1;font-size:13px;">Gerar novo código</button>
+    </div>
+  </div>
+</div>
+
+<div id="recaptcha-mfa" style="display:none;"></div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="auth-logo-icon" style="width:38px;height:38px;border-radius:12px;">
+        <img src="utome.png" style="width:38px;height:38px;border-radius:12px;" alt="UTOME logo">
+      </div>
+      <div>
+        <h1>UTOME</h1>
+        <div class="greeting" id="greeting"></div>
+      </div>
+    </div>
+    <div class="user-menu" id="user-menu">
+      <button class="user-avatar-btn" id="user-avatar-btn" title="Minha conta"></button>
+      <div class="user-dropdown" id="user-dropdown">
+        <a href="#" onclick="return false;" id="dd-account" style="cursor:default;opacity:.7;font-size:13px;padding-bottom:8px;">
+          <span class="ei"><img src="https://img.icons8.com/ios-filled/16/8B889C/user.png" width="16" height="16"></span>
+          <span id="dd-name">Usuário</span>
+        </a>
+        <div class="dd-divider"></div>
+        <button id="dd-profile-btn">
+          <span class="ei"><img src="https://img.icons8.com/ios-filled/16/2B2A3D/settings.png" id="dd-settings-icon" width="16" height="16"></span>
+          Meu Perfil
+        </button>
+        <div class="dd-divider"></div>
+        <button class="dd-logout" id="logout-btn">
+          <span class="ei"><img src="https://img.icons8.com/ios-filled/16/E74C3C/exit.png" width="16" height="16"></span>
+          Sair
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Crianças</h2>
+      <div id="children-list"></div>
+      <button class="add-child-btn" id="add-child-btn">+ Nova criança</button>
+
+      <!-- UTOME Gen 1: Dispositivo vinculado à criança selecionada -->
+      <div class="device-section" id="device-section" style="display:none;">
+        <div class="device-section-title">Meu UTOME</div>
+        <div id="device-panel-content">
+          <!-- Preenchido dinamicamente por renderDevicePanel() -->
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="routine-panel">
+      <div class="empty-state">
+        <div class="icon"><img src="https://img.icons8.com/ios-filled/64/FF7A00/target.png"></div>
+        <h3>Selecione uma criança</h3>
+        <p>Escolha uma criança na esquerda para configurar sua rotina.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/dompurify@3.0.3/dist/purify.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ── HTTPS Enforcement (exceto localhost) ──
+(function enforceHTTPS() {
+  const h = location.hostname;
+  if (location.protocol === "http:" && h !== "localhost" && h !== "127.0.0.1" && !h.endsWith(".local")) {
+    location.replace(location.href.replace(/^http:/, "https:"));
+  }
+})();
+
+// Offline screen button handlers
+document.addEventListener('DOMContentLoaded', () => {
+  const retryBtn = document.getElementById('btn-retry');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      // Simple retry: reload the page
+      location.reload();
+    });
+  }
+  const offlineModeBtn = document.getElementById('btn-offline-mode');
+  if (offlineModeBtn) {
+    offlineModeBtn.addEventListener('click', () => {
+      // Hide offline screen, keep app in offline state (toast still visible if needed)
+      const screen = document.getElementById('offline-screen');
+      if (screen) screen.style.display = 'none';
+      const banner = document.getElementById('offline-banner');
+      if (banner) banner.style.display = 'block';
+    });
+  }
+});
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmaTDtHrmPe4q8Hk4Ko5UCa3qKWfWnqAg",
+  authDomain: "tomi-ia.firebaseapp.com",
+  projectId: "tomi-ia",
+  storageBucket: "tomi-ia.firebasestorage.app",
+  messagingSenderId: "932306144435",
+  appId: "1:932306144435:web:0eb1f59da3825f77f7b4c6",
+  measurementId: "G-6HBR7K49MQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ══════════════════════════════════════════════════════════
+// UTOME_SEC — Camada de segurança centralizada
+// ══════════════════════════════════════════════════════════
+const UTOME_SEC = {
+  LIMITS: {
+    MAX_CHILDREN: 10,
+    MAX_TASKS_PER_CHILD: 50,
+    MAX_UPLOAD_BYTES: 500 * 1024,
+    ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp"],
+    MAX_NAME: 50,
+    MAX_NICK: 30,
+    MIN_PASSWORD: 8
+  },
+  RATE: {
+    login: { max: 5, windowMs: 15 * 60 * 1000 },
+    register: { max: 3, windowMs: 60 * 60 * 1000 },
+    createChild: { max: 10, windowMs: 60 * 60 * 1000 },
+    createTask: { max: 30, windowMs: 60 * 60 * 1000 },
+    upload: { max: 10, windowMs: 10 * 60 * 1000 }
+  },
+  _anomaly: { actions: [], loginFailures: 0, uploadRejections: 0 }
+};
+
+// Session Management + anti-fixação
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+
+function esc(str) {
+  const d = document.createElement("div");
+  d.textContent = str ?? "";
+  return d.innerHTML;
+}
+
+function sanitizeText(value, maxLen = 50) {
+  return DOMPurify.sanitize(String(value || "").trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).slice(0, maxLen);
+}
+
+function validateText(value, { min = 1, max = 50, label = "Campo" } = {}) {
+  const v = sanitizeText(value, max);
+  if (v.length < min) return { ok: false, error: `${label} é obrigatório`, value: v };
+  if (v.length > max) return { ok: false, error: `${label} muito longo`, value: v };
+  return { ok: true, value: v };
+}
+
+function validateEmail(raw) {
+  const v = sanitizeText(raw, 120);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { ok: false, error: "E-mail inválido" };
+  return { ok: true, value: v };
+}
+
+function validatePassword(pw) {
+  if (!pw || pw.length < UTOME_SEC.LIMITS.MIN_PASSWORD) {
+    return { ok: false, error: `Senha deve ter pelo menos ${UTOME_SEC.LIMITS.MIN_PASSWORD} caracteres` };
+  }
+  return { ok: true };
+}
+
+function validateImageFile(file) {
+  if (!file) return { ok: false, error: "Nenhum arquivo selecionado" };
+  if (!UTOME_SEC.LIMITS.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { ok: false, error: "Envie JPG, PNG ou WEBP." };
+  }
+  if (file.size > UTOME_SEC.LIMITS.MAX_UPLOAD_BYTES) {
+    return { ok: false, error: "Imagem deve ter no máximo 500KB." };
+  }
+  return { ok: true };
+}
+
+function validateBase64Image(dataUrl) {
+  if (!dataUrl || !dataUrl.startsWith("data:image/")) return { ok: false, error: "Formato de imagem inválido" };
+  const approxBytes = Math.ceil((dataUrl.length - dataUrl.indexOf(",") - 1) * 0.75);
+  if (approxBytes > UTOME_SEC.LIMITS.MAX_UPLOAD_BYTES) return { ok: false, error: "Imagem muito grande (máx. 500KB)." };
+  return { ok: true };
+}
+
+function getAuthErrorMsg() {
+  return "Credenciais inválidas ou erro de autenticação.";
+}
+
+function checkRateLimit(key) {
+  const cfg = UTOME_SEC.RATE[key];
+  if (!cfg) return { allowed: true };
+  const store = JSON.parse(localStorage.getItem("utome_rate") || "{}");
+  const now = Date.now();
+  const entry = store[key] || { attempts: [], blockedUntil: 0 };
+  if (entry.blockedUntil > now) return { allowed: false, retryAfter: entry.blockedUntil - now };
+  entry.attempts = entry.attempts.filter(t => now - t < cfg.windowMs);
+  if (entry.attempts.length >= cfg.max) {
+    entry.blockedUntil = now + cfg.windowMs;
+    store[key] = entry;
+    localStorage.setItem("utome_rate", JSON.stringify(store));
+    logAudit("RATE_LIMIT_HIT", { key }, "WARNING");
+    return { allowed: false };
+  }
+  entry.attempts.push(now);
+  store[key] = entry;
+  localStorage.setItem("utome_rate", JSON.stringify(store));
+  return { allowed: true };
+}
+
+function recordAction(action) {
+  const now = Date.now();
+  UTOME_SEC._anomaly.actions.push({ action, ts: now });
+  UTOME_SEC._anomaly.actions = UTOME_SEC._anomaly.actions.filter(a => now - a.ts < 60000);
+  if (UTOME_SEC._anomaly.actions.length > 40) {
+    logAudit("ANOMALY_HIGH_ACTIVITY", { count: UTOME_SEC._anomaly.actions.length, action }, "CRITICAL");
+  }
+}
+
+function recordLoginFailure() {
+  UTOME_SEC._anomaly.loginFailures++;
+  if (UTOME_SEC._anomaly.loginFailures >= 5) {
+    logAudit("ANOMALY_LOGIN_FAILURES", { count: UTOME_SEC._anomaly.loginFailures }, "WARNING");
+    UTOME_SEC._anomaly.loginFailures = 0;
+  }
+}
+
+function recordUploadRejection() {
+  UTOME_SEC._anomaly.uploadRejections++;
+  if (UTOME_SEC._anomaly.uploadRejections >= 3) {
+    logAudit("ANOMALY_UPLOAD_SPIKE", { count: UTOME_SEC._anomaly.uploadRejections }, "WARNING");
+    UTOME_SEC._anomaly.uploadRejections = 0;
+  }
+}
+
+function enforceResourceLimit(type, currentCount) {
+  if (type === "children" && currentCount >= UTOME_SEC.LIMITS.MAX_CHILDREN) {
+    return { ok: false, error: `Limite de ${UTOME_SEC.LIMITS.MAX_CHILDREN} crianças atingido.` };
+  }
+  if (type === "tasks" && currentCount >= UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD) {
+    return { ok: false, error: `Limite de ${UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD} tarefas por criança.` };
+  }
+  return { ok: true };
+}
+
+// Aviso não-bloqueante quando o responsável se aproxima (~80%) do limite de
+// crianças ou tarefas. Diferente de enforceResourceLimit (que bloqueia no
+// limite exato), isto apenas avisa com antecedência via toast, sem impedir
+// a ação. Mostra no máximo uma vez por sessão por tipo, para não repetir o
+// aviso a cada tarefa criada.
+const _warnedLimits = { children: false, tasks: {} };
+function checkResourceWarning(type, newCount) {
+  if (type === "children") {
+    const max = UTOME_SEC.LIMITS.MAX_CHILDREN;
+    if (!_warnedLimits.children && newCount >= Math.ceil(max * 0.8) && newCount < max) {
+      _warnedLimits.children = true;
+      showToast(`Você já tem ${newCount} de ${max} crianças cadastradas.`);
+    }
+  } else if (type === "tasks") {
+    const max = UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD;
+    const childId = state.activeChildId;
+    if (childId && !_warnedLimits.tasks[childId] && newCount >= Math.ceil(max * 0.8) && newCount < max) {
+      _warnedLimits.tasks[childId] = true;
+      showToast(`Esta criança já tem ${newCount} de ${max} tarefas cadastradas.`);
+    }
+  }
+}
+
+async function initSessionSecurity(user) {
+  const sessionId = crypto.randomUUID();
+  sessionStorage.setItem("utome_session_id", sessionId);
+  try { await user.getIdToken(true); } catch (_) {}
+  try {
+    await db.collection("users").doc(user.uid).update({
+      lastSessionId: sessionId,
+      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (_) {}
+  logAudit("SESSION_INIT", { sessionId });
+}
+
+function clearSessionSecurity() {
+  sessionStorage.removeItem("utome_session_id");
+  UTOME_SEC._anomaly = { actions: [], loginFailures: 0, uploadRejections: 0 };
+}
+
+async function withGuard(btn, rateKey, actionName, fn) {
+  const rl = checkRateLimit(rateKey);
+  if (!rl.allowed) {
+    alert("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
+    return;
+  }
+  recordAction(actionName);
+  if (btn) btn.disabled = true;
+  try { return await fn(); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+// Anti-scraping: detecta automação headless
+if (navigator.webdriver) {
+  console.warn("[UTOME] Ambiente automatizado detectado.");
+  setTimeout(() => logAudit("BOT_SUSPECTED", { webdriver: true }, "WARNING"), 3000);
+}
+
+// Audit Logging
+async function logAudit(action, details = {}, severity = "INFO") {
+  try {
+    if (!auth.currentUser) return;
+    await db.collection(`users/${auth.currentUser.uid}/audit_logs`).add({
+      action, details, severity,
+      sessionId: sessionStorage.getItem("utome_session_id") || null,
+      actionCount1m: UTOME_SEC._anomaly.actions.length,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent
+    });
+  } catch (_) { console.warn("Audit log falhou"); }
+}
+
+// ── MFA (Firebase Phone 2FA) ──
+let mfaResolver = null;
+let mfaVerificationId = null;
+let mfaRecaptchaVerifier = null;
+
+function getMfaRecaptcha() {
+  if (!mfaRecaptchaVerifier) {
+    mfaRecaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-mfa", { size: "invisible" }, auth);
+  }
+  return mfaRecaptchaVerifier;
+}
+
+function openMfaModal(title, desc) {
+  document.getElementById("mfa-modal-title").textContent = title;
+  document.getElementById("mfa-modal-desc").textContent = desc;
+  document.getElementById("mfa-code").value = "";
+  document.getElementById("modal-mfa").classList.add("open");
+}
+
+function closeMfaModal() {
+  document.getElementById("modal-mfa").classList.remove("open");
+  mfaResolver = null;
+  mfaVerificationId = null;
+}
+
+async function handleMfaSignIn(resolver) {
+  mfaResolver = resolver;
+  const hint = resolver.hints[0];
+  const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+  mfaVerificationId = await phoneAuthProvider.verifyPhoneNumber(
+    { multiFactorHint: hint, session: resolver.session },
+    getMfaRecaptcha()
+  );
+  openMfaModal("Verificação em 2 etapas", "Digite o código SMS enviado ao seu telefone cadastrado.");
+}
+
+async function updateMfaUI() {
+  const user = auth.currentUser;
+  const badge = document.getElementById("mfa-status-badge");
+  const enableBtn = document.getElementById("mfa-enable-btn");
+  const disableBtn = document.getElementById("mfa-disable-btn");
+  const enrollFields = document.getElementById("mfa-enroll-fields");
+  if (!user || !badge) return;
+  const enrolled = firebase.auth().multiFactor(user).enrolledFactors.length > 0;
+  badge.textContent = enrolled ? "2FA: ativado" : "2FA: desativado";
+  badge.className = "mfa-status " + (enrolled ? "on" : "off");
+  disableBtn.style.display = enrolled ? "block" : "none";
+  enrollFields.style.display = enrolled ? "none" : "block";
+  enableBtn.style.display = enrolled ? "none" : "block";
+}
+
+document.getElementById("mfa-cancel").addEventListener("click", () => {
+  closeMfaModal();
+  setLoading(false);
+});
+
+document.getElementById("mfa-confirm").addEventListener("click", async () => {
+  const code = document.getElementById("mfa-code").value.trim();
+  const btn = document.getElementById("mfa-confirm");
+  if (!code || code.length < 6) { alert("Digite o código de 6 dígitos."); return; }
+  btn.disabled = true;
+  try {
+    const cred = firebase.auth.PhoneAuthProvider.credential(mfaVerificationId, code);
+    if (mfaResolver) {
+      const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+      await mfaResolver.resolveSignIn(assertion);
+      logAudit("MFA_LOGIN_SUCCESS", {});
+      closeMfaModal();
+    } else {
+      const user = auth.currentUser;
+      const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+      await firebase.auth().multiFactor(user).enroll(assertion, "Telefone SMS");
+      logAudit("MFA_ENROLL_SUCCESS", {});
+      closeMfaModal();
+      updateMfaUI();
+      showToast("2FA ativado com sucesso");
+    }
+  } catch (e) {
+    logAudit("MFA_FAILED", {}, "WARNING");
+    alert(getAuthErrorMsg());
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("mfa-enable-btn").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const phone = document.getElementById("mfa-phone").value.trim();
+  if (!phone || phone.length < 10) { alert("Informe um telefone válido com DDI (ex: +5511999999999)."); return; }
+  await withGuard(document.getElementById("mfa-enable-btn"), "login", "MFA_ENROLL", async () => {
+    try {
+      const session = await firebase.auth().multiFactor(user).getSession();
+      const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+      mfaVerificationId = await phoneAuthProvider.verifyPhoneNumber({ phoneNumber: phone, session }, getMfaRecaptcha());
+      mfaResolver = null;
+      openMfaModal("Ativar 2FA", "Digite o código SMS para confirmar seu telefone.");
+      logAudit("MFA_ENROLL_STARTED", {});
+    } catch (e) {
+      logAudit("MFA_ENROLL_FAILED", {}, "WARNING");
+      alert("Não foi possível iniciar o 2FA. Verifique o telefone e se o MFA está habilitado no Firebase Console.");
+    }
+  });
+});
+
+document.getElementById("mfa-disable-btn").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const factors = firebase.auth().multiFactor(user).enrolledFactors;
+  if (!factors.length) return;
+  const confirmed = await showConfirmModal("Desativar 2FA?", "Sua conta ficará menos protegida.");
+  if (!confirmed) return;
+  try {
+    await firebase.auth().multiFactor(user).unenroll(factors[0]);
+    logAudit("MFA_DISABLED", {});
+    updateMfaUI();
+    showToast("2FA desativado");
+  } catch (e) {
+    alert("Não foi possível desativar o 2FA.");
+  }
+});
+
+const DAY_LABELS = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+const COLORS = [
+  {key:"blue",   label:"Aguardando", icon:"https://img.icons8.com/ios-filled/16/6FA8E0/clock.png"},
+  {key:"green",  label:"Concluído",  icon:"https://img.icons8.com/ios-filled/16/5FCBA3/checkmark.png"},
+  {key:"purple", label:"Recompensa", icon:"https://img.icons8.com/ios-filled/16/B68CE0/trophy.png"},
+  {key:"yellow", label:"Lembrete",   icon:"https://img.icons8.com/ios-filled/16/F0C674/bell.png"}
+];
+
+// G: Icons8 sugeridos para o grid de tarefas
+const SUGGESTED_ICONS = [
+  {name:"smile",   src:"https://img.icons8.com/ios-filled/32/smiling.png"},
+  {name:"tooth",   src:"https://img.icons8.com/ios-filled/32/tooth.png"},
+  {name:"bath",    src:"https://img.icons8.com/ios-filled/32/bathtub.png"},
+  {name:"food",    src:"https://img.icons8.com/ios-filled/32/dining-room.png"},
+  {name:"book",    src:"https://img.icons8.com/ios-filled/32/book.png"},
+  {name:"bag",     src:"https://img.icons8.com/ios-filled/32/school-backpack.png"},
+  {name:"moon",    src:"https://img.icons8.com/ios-filled/32/moon-symbol.png"},
+  {name:"sun",     src:"https://img.icons8.com/ios-filled/32/sun.png"},
+  {name:"run",     src:"https://img.icons8.com/ios-filled/32/running.png"},
+  {name:"game",    src:"https://img.icons8.com/ios-filled/32/controller.png"},
+  {name:"paint",   src:"https://img.icons8.com/ios-filled/32/paint-palette.png"},
+  {name:"paw",     src:"https://img.icons8.com/ios-filled/32/paw.png"},
+  {name:"music",   src:"https://img.icons8.com/ios-filled/32/musical-notes.png"},
+  {name:"ball",    src:"https://img.icons8.com/ios-filled/32/basketball.png"},
+  {name:"bear",    src:"https://img.icons8.com/ios-filled/32/teddy-bear.png"},
+  {name:"sleep",   src:"https://img.icons8.com/ios-filled/32/sleeping.png"},
+  {name:"star",    src:"https://img.icons8.com/ios-filled/32/star.png"},
+  {name:"milk",    src:"https://img.icons8.com/ios-filled/32/milk-bottle.png"},
+  {name:"apple",   src:"https://img.icons8.com/ios-filled/32/apple.png"},
+  {name:"shirt",   src:"https://img.icons8.com/ios-filled/32/t-shirt.png"},
+  {name:"puzzle",  src:"https://img.icons8.com/ios-filled/32/puzzle.png"},
+  {name:"swim",    src:"https://img.icons8.com/ios-filled/32/swimming.png"},
+  {name:"bike",    src:"https://img.icons8.com/ios-filled/32/cycling.png"},
+  {name:"theater", src:"https://img.icons8.com/ios-filled/32/comedy.png"},
+  {name:"dog",     src:"https://img.icons8.com/ios-filled/32/dog.png"},
+  {name:"pencil",  src:"https://img.icons8.com/ios-filled/32/pencil.png"},
+  {name:"read",    src:"https://img.icons8.com/ios-filled/32/reading.png"},
+  {name:"rainbow", src:"https://img.icons8.com/ios-filled/32/rainbow.png"}
+];
+let selectedTaskEmoji = "smile";
+let editingTaskId = null;
+
+let state = {user:null,children:[],activeChildId:null,tasks:[]};
+let authMode = "login";
+let newTaskDays = [0,1,2,3,4,5,6];
+let onboardingDone = localStorage.getItem("utome_onboarding") === "true";
+let taskUnsubscribe = null;
+// F: View state: "today" | "week"
+let taskView = "today";
+
+// Hoje (0=Seg, 6=Dom)
+function getTodayIdx() {
+  const jsDay = new Date().getDay();
+  return jsDay === 0 ? 6 : jsDay - 1;
+}
+
+// Controla a visibilidade do splash após Firebase resolver
+let firebaseResolved = false;
+let splashTimerDone = false;
+
+function tryHideSplash() {
+  if (!firebaseResolved || !splashTimerDone) return;
+  document.getElementById("splash").style.display = "none";
+}
+
+setTimeout(() => {
+  splashTimerDone = true;
+  tryHideSplash();
+}, 2000);
+
+function goOnboarding(step) {
+  document.querySelectorAll(".onboarding-screen").forEach((s,i) => {
+    s.classList.toggle("active", i === step);
+  });
+  document.querySelectorAll(".onboarding-nav button").forEach((b,i) => {
+    b.classList.toggle("active", i === step);
+  });
+}
+
+function skipOnboarding() {
+  localStorage.setItem("utome_onboarding", "true");
+  document.getElementById("onboarding").style.display = "none";
+  showAuth();
+}
+
+window.addEventListener("online", () => {
+  // Hide both toast and full-screen offline UI
+  const banner = document.getElementById("offline-banner");
+  if (banner) banner.style.display = "none";
+  const screen = document.getElementById("offline-screen");
+  if (screen) screen.style.display = "none";
+});
+window.addEventListener("offline", () => {
+  // Show full-screen offline UI (preferred over toast)
+  const screen = document.getElementById("offline-screen");
+  if (screen) screen.style.display = "flex";
+});
+if (!navigator.onLine) { document.getElementById("offline-banner").style.display = "block"; }
+
+function showAuth() {
+  document.getElementById("auth-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+}
+
+function showApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  
+  const nick = state.user.nick || (state.user.name || "").split(" ")[0];
+  document.getElementById("greeting").textContent = "Olá, " + nick;
+  
+  // H: Avatar — use photo if available, otherwise initial
+  const avatarBtn = document.getElementById("user-avatar-btn");
+  if (state.user.photoURL) {
+    avatarBtn.innerHTML = `<img src="${state.user.photoURL}" width="38" height="38" style="border-radius:50%;object-fit:cover;width:100%;height:100%;">`;
+  } else {
+    const initial = (state.user.name || "U")[0].toUpperCase();
+    avatarBtn.textContent = initial;
+  }
+  document.getElementById("dd-name").textContent = state.user.name || "Usuário";
+  
+  // Sync settings icon tint with theme
+  const settingsIcon = document.getElementById("dd-settings-icon");
+  if (settingsIcon) settingsIcon.style.filter = document.documentElement.getAttribute("data-theme") === "dark" ? "invert(1)" : "";
+  
+  loadChildren();
+}
+
+// H: Dropdown toggle
+document.getElementById("user-avatar-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  document.getElementById("user-dropdown").classList.toggle("open");
+});
+document.addEventListener("click", () => {
+  document.getElementById("user-dropdown").classList.remove("open");
+});
+
+function setLoading(on) {
+  document.getElementById("auth-loading").style.display = on ? "block" : "none";
+  document.getElementById("auth-submit").disabled = on;
+}
+
+document.getElementById("auth-toggle").addEventListener("click", () => {
+  authMode = authMode === "login" ? "register" : "login";
+  document.getElementById("auth-title").innerHTML = authMode === "login" ? "Bem-vindo de volta! 👋" : "Criar sua conta 🎉";
+  document.getElementById("auth-subtitle").innerHTML = authMode === "login" ? "Faça login e continue sua jornada com a <span class=\"accent\">utome</span>." : "Junte-se à <span class=\"accent\">utome</span> e organize a rotina da família.";
+  document.getElementById("auth-submit").textContent = authMode === "login" ? "Continuar" : "Cadastrar";
+  document.getElementById("auth-toggle").textContent = authMode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar";
+  document.getElementById("register-fields").style.display = authMode === "register" ? "block" : "none";
+  document.getElementById("auth-error").style.display = "none";
+});
+
+document.getElementById("btn-google").addEventListener("click", async () => {
+  const errBox = document.getElementById("auth-error");
+  errBox.style.display = "none";
+  if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
+  recordAction("LOGIN_GOOGLE");
+  const btn = document.getElementById("btn-google");
+  btn.disabled = true;
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    logAudit("LOGIN_SUCCESS", { method: "google" });
+    // onAuthStateChanged cuida do resto (carregar/criar doc do usuário e mostrar o app)
+  } catch(e) {
+    console.error("[UTOME] Erro no login com Google:", e);
+    btn.disabled = false;
+    if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      errBox.textContent = getAuthErrorMsg();
+      errBox.style.display = "block";
+    }
+  }
+});
+
+document.getElementById("btn-apple").addEventListener("click", async () => {
+  const errBox = document.getElementById("auth-error");
+  errBox.style.display = "none";
+  if (!checkRateLimit("login").allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
+  recordAction("LOGIN_APPLE");
+  const btn = document.getElementById("btn-apple");
+  btn.disabled = true;
+  try {
+    const provider = new firebase.auth.OAuthProvider("apple.com");
+    await auth.signInWithPopup(provider);
+    logAudit("LOGIN_SUCCESS", { method: "apple" });
+    // onAuthStateChanged cuida do resto (carregar/criar doc do usuário e mostrar o app)
+  } catch(e) {
+    console.error("[UTOME] Erro no login com Apple:", e);
+    btn.disabled = false;
+    if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      errBox.textContent = getAuthErrorMsg();
+      errBox.style.display = "block";
+    }
+  }
+});
+
+document.getElementById("auth-submit").addEventListener("click", async () => {
+  const errBox = document.getElementById("auth-error");
+  errBox.style.display = "none";
+  const emailVal = validateEmail(document.getElementById("auth-email").value);
+  const password = document.getElementById("auth-password").value;
+  if (!emailVal.ok) { errBox.textContent = emailVal.error; errBox.style.display = "block"; return; }
+  if (!password) { errBox.textContent = "Preencha todos os campos"; errBox.style.display = "block"; return; }
+  const rateKey = authMode === "login" ? "login" : "register";
+  const rl = checkRateLimit(rateKey);
+  if (!rl.allowed) { errBox.textContent = getAuthErrorMsg(); errBox.style.display = "block"; return; }
+  setLoading(true);
+  recordAction(authMode === "login" ? "LOGIN_ATTEMPT" : "REGISTER_ATTEMPT");
+  try {
+    if (authMode === "login") {
+      const pwVal = validatePassword(password);
+      if (!pwVal.ok) throw new Error("invalid");
+      await auth.signInWithEmailAndPassword(emailVal.value, password);
+      logAudit("LOGIN_SUCCESS", { method: "email" });
+    } else {
+      const nameVal = validateText(document.getElementById("reg-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+      const pwVal = validatePassword(password);
+      if (!nameVal.ok || !pwVal.ok) throw new Error("invalid");
+      const res = await auth.createUserWithEmailAndPassword(emailVal.value, password);
+      await db.collection("users").doc(res.user.uid).set({ name: nameVal.value, email: emailVal.value });
+      logAudit("REGISTER_SUCCESS", { method: "email" });
+    }
+  } catch (e) {
+    if (e.code === "auth/multi-factor-auth-required") {
+      try {
+        await handleMfaSignIn(e.resolver);
+        return;
+      } catch (_) {
+        recordLoginFailure();
+      }
+    } else {
+      recordLoginFailure();
+    }
+    logAudit("LOGIN_FAILED", { method: "email" }, "WARNING");
+    errBox.textContent = getAuthErrorMsg();
+    errBox.style.display = "block";
+    setLoading(false);
+  }
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  logAudit("LOGOUT", {});
+  clearSessionSecurity();
+  if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
+  if (deviceState.unsubscribe) { deviceState.unsubscribe(); deviceState.unsubscribe = null; }
+  auth.signOut();
+});
+
+// ── Theme system ──
+function applyTheme(pref) {
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = pref === "dark" || (pref === "system" && prefersDark);
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  localStorage.setItem("utome_theme", pref);
+}
+(function initTheme() {
+  const saved = localStorage.getItem("utome_theme") || "system";
+  applyTheme(saved);
+})();
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  const saved = localStorage.getItem("utome_theme") || "system";
+  if (saved === "system") applyTheme("system");
+});
+
+// ── Profile modal ──
+let profilePhotoDataUrl = null;
+
+document.getElementById("dd-profile-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  document.getElementById("user-dropdown").classList.remove("open");
+  openProfileModal();
+});
+
+function openProfileModal() {
+  const modal = document.getElementById("modal-profile");
+  document.getElementById("profile-name").value = state.user.name || "";
+  document.getElementById("profile-nick").value = state.user.nick || "";
+  profilePhotoDataUrl = state.user.photoURL || null;
+  
+  // Set avatar preview
+  const preview = document.getElementById("profile-avatar-preview");
+  if (profilePhotoDataUrl) {
+    preview.innerHTML = `<img src="${profilePhotoDataUrl}">`;
+  } else {
+    preview.textContent = (state.user.name || "U")[0].toUpperCase();
+    preview.style.display = "flex";
+  }
+  
+  // Set theme selection
+  const savedTheme = localStorage.getItem("utome_theme") || "system";
+  document.querySelectorAll(".theme-opt").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.t === savedTheme);
+  });
+  
+  modal.classList.add("open");
+  updateMfaUI();
+}
+
+document.getElementById("profile-close").addEventListener("click", () => {
+  document.getElementById("modal-profile").classList.remove("open");
+});
+
+document.getElementById("modal-profile").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("modal-profile")) {
+    document.getElementById("modal-profile").classList.remove("open");
+  }
+});
+
+// Avatar upload in profile
+document.getElementById("profile-photo-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const rl = checkRateLimit("upload");
+  if (!rl.allowed) { alert("Muitos uploads. Aguarde alguns minutos."); e.target.value = ""; return; }
+  const check = validateImageFile(file);
+  if (!check.ok) {
+    alert(check.error);
+    logAudit("UPLOAD_REJECTED", { type: file.type, size: file.size }, "WARNING");
+    recordUploadRejection();
+    e.target.value = "";
+    return;
+  }
+  recordAction("UPLOAD_PROFILE");
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    profilePhotoDataUrl = ev.target.result;
+    const preview = document.getElementById("profile-avatar-preview");
+    preview.innerHTML = `<img src="${profilePhotoDataUrl}">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Theme picker in profile
+document.querySelectorAll(".theme-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".theme-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyTheme(btn.dataset.t);
+  });
+});
+
+document.getElementById("profile-save").addEventListener("click", async () => {
+  await withGuard(document.getElementById("profile-save"), "login", "UPDATE_PROFILE", async () => {
+    const nameVal = validateText(document.getElementById("profile-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+    const nickVal = validateText(document.getElementById("profile-nick").value, { min: 0, max: UTOME_SEC.LIMITS.MAX_NICK, label: "Nick" });
+    if (!nameVal.ok) { alert(nameVal.error); return; }
+    if (!nickVal.ok) { alert(nickVal.error); return; }
+    if (profilePhotoDataUrl && profilePhotoDataUrl !== state.user.photoURL) {
+      const imgCheck = validateBase64Image(profilePhotoDataUrl);
+      if (!imgCheck.ok) { alert(imgCheck.error); return; }
+    }
+    const updates = { name: nameVal.value, nick: nickVal.value };
+    if (profilePhotoDataUrl !== state.user.photoURL) updates.photoURL = profilePhotoDataUrl;
+    await db.collection("users").doc(state.user.uid).update(updates);
+    state.user = { ...state.user, ...updates };
+    document.getElementById("modal-profile").classList.remove("open");
+    showApp();
+    showToast("Perfil atualizado");
+    logAudit("UPDATE_PROFILE", {});
+  });
+});
+
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    try {
+      const doc = await db.collection("users").doc(user.uid).get();
+      const data = doc.exists ? doc.data() : {};
+      const name = data.name || user.displayName || "Usuário";
+      if (!doc.exists) {
+        await db.collection("users").doc(user.uid).set({ name, email: user.email || "" });
+      }
+      state.user = { uid: user.uid, name, email: user.email || "", nick: data.nick || "", photoURL: data.photoURL || null, ...data };
+      if (!sessionStorage.getItem("utome_session_id")) await initSessionSecurity(user);
+      closeMfaModal();
+      setLoading(false);
+      firebaseResolved = true;
+      tryHideSplash();
+      showApp();
+    } catch (e) {
+      console.error("[UTOME] Falha ao carregar dados do usuário após login:", e);
+      firebaseResolved = true;
+      tryHideSplash();
+      setLoading(false);
+      const errBox = document.getElementById("auth-error");
+      if (errBox) {
+        errBox.textContent = "Não foi possível carregar sua conta. Tente novamente em alguns instantes.";
+        errBox.style.display = "block";
+      }
+      showAuth();
+    }
+  } else {
+    state.user = null;
+    clearSessionSecurity();
+    if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
+    firebaseResolved = true;
+    tryHideSplash();
+    if (!onboardingDone) {
+      document.getElementById("onboarding").style.display = "block";
+    } else {
+      showAuth();
+    }
+  }
+});
+
+// K: Skeleton loaders
+function showChildrenSkeleton() {
+  const list = document.getElementById("children-list");
+  list.innerHTML = [1,2,3].map(() => `
+    <div class="skeleton-child">
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function showTasksSkeleton(panel) {
+  const skeletons = [1,2,3].map(() => `
+    <div class="skeleton-task">
+      <div class="skeleton skeleton-circle"></div>
+      <div class="skeleton-info">
+        <div class="skeleton s1"></div>
+        <div class="skeleton s2"></div>
+        <div class="skeleton s3"></div>
+      </div>
+    </div>
+  `).join("");
+  panel.innerHTML = `
+    <div class="routine-header"><div><h2 style="opacity:.3">Carregando...</h2></div></div>
+    <div style="margin-bottom:16px;">${skeletons}</div>
+  `;
+}
+
+async function loadChildren() {
+  showChildrenSkeleton();
+  const snap = await db.collection("children").where("userId","==",state.user.uid).get();
+  state.children = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderChildren();
+  const addBtn = document.getElementById("add-child-btn");
+  if (addBtn) {
+    const atLimit = state.children.length >= UTOME_SEC.LIMITS.MAX_CHILDREN;
+    addBtn.disabled = atLimit;
+    addBtn.title = atLimit ? `Limite de ${UTOME_SEC.LIMITS.MAX_CHILDREN} crianças` : "";
+  }
+  if (state.children.length && !state.activeChildId) {
+    selectChild(state.children[0].id);
+  }
+}
+
+function renderChildren() {
+  const list = document.getElementById("children-list");
+  list.innerHTML = "";
+  if (state.children.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px;text-align:center;">Nenhuma criança</div>';
+    return;
+  }
+  state.children.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "child-item" + (c.id === state.activeChildId ? " active" : "");
+    const childColor = c.color || "#FF7A00";
+    div.style.setProperty("--child-color", childColor);
+    const ageLabel = c.age ? `${c.age} anos` : `ID: ${c.deviceId}`;
+    const avatarContent = c.photoURL
+      ? `<img src="${c.photoURL}" width="36" height="36" style="object-fit:cover;width:100%;height:100%;border-radius:50%;">`
+      : (c.avatar || "🧒");
+    div.innerHTML = `
+      <div class="child-avatar" style="background:${childColor}22;border:2px solid ${childColor};">${avatarContent}</div>
+      <div class="child-info child-select">
+        <div class="child-name">${esc(c.name)}</div>
+        <small>${esc(ageLabel)}</small>
+      </div>
+      <button class="child-delete-btn" title="Remover criança" data-id="${esc(c.id)}" data-name="${esc(c.name)}">×</button>
+    `;
+    div.querySelector(".child-select").addEventListener("click", () => selectChild(c.id));
+    div.querySelector(".child-delete-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteChild(c.id, c.name);
+    });
+    list.appendChild(div);
+  });
+}
+
+async function deleteChild(childId, childName) {
+  const confirmed = await showConfirmModal(
+    `Remover "${childName}"?`,
+    "Todas as tarefas desta criança também serão deletadas. Esta ação não pode ser desfeita."
+  );
+  if (!confirmed) return;
+  const taskSnap = await db.collection("tasks").where("childId", "==", childId).get();
+  const batch = db.batch();
+  taskSnap.docs.forEach(doc => batch.delete(doc.ref));
+  batch.delete(db.collection("children").doc(childId));
+  await batch.commit();
+  logAudit("DELETE_CHILD", { childId });
+  state.children = state.children.filter(c => c.id !== childId);
+  if (state.activeChildId === childId) {
+    state.activeChildId = null;
+    state.tasks = [];
+  }
+  renderChildren();
+  if (state.activeChildId) {
+    selectChild(state.activeChildId);
+  } else {
+    document.getElementById("routine-panel").innerHTML = '<div class="empty-state"><div class="icon"><img src="https://img.icons8.com/ios-filled/64/FF7A00/target.png"></div><h3>Selecione uma criança</h3><p>Escolha uma criança na esquerda para configurar sua rotina.</p></div>';
+  }
+}
+
+// Modal: Nova Criança
+let selectedColor = "#FF7A00";
+
+document.querySelectorAll(".color-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".color-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedColor = btn.dataset.color;
+  });
+});
+
+let childPhotoDataUrl = null;
+
+document.getElementById("add-child-btn").addEventListener("click", () => {
+  document.getElementById("nc-name").value = "";
+  document.getElementById("nc-avatar").value = "🧒";
+  document.getElementById("nc-age").value = "";
+  childPhotoDataUrl = null;
+  document.getElementById("nc-avatar-preview").innerHTML = "🧒";
+  document.getElementById("nc-clear-photo").style.display = "none";
+  selectedColor = "#FF7A00";
+  document.querySelectorAll(".color-opt").forEach((b,i) => b.classList.toggle("active", i===0));
+  document.getElementById("modal-child").classList.add("open");
+  setTimeout(() => document.getElementById("nc-name").focus(), 50);
+});
+
+// Photo upload for child
+document.getElementById("nc-photo-upload").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const rl = checkRateLimit("upload");
+  if (!rl.allowed) { alert("Muitos uploads. Aguarde alguns minutos."); e.target.value = ""; return; }
+  const check = validateImageFile(file);
+  if (!check.ok) {
+    alert(check.error);
+    logAudit("UPLOAD_REJECTED", { type: file.type, size: file.size }, "WARNING");
+    recordUploadRejection();
+    e.target.value = "";
+    return;
+  }
+  recordAction("UPLOAD_CHILD");
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    childPhotoDataUrl = ev.target.result;
+    document.getElementById("nc-avatar-preview").innerHTML = `<img src="${childPhotoDataUrl}" width="52" height="52" style="object-fit:cover;width:100%;height:100%;border-radius:50%;">`;
+    document.getElementById("nc-clear-photo").style.display = "block";
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("nc-clear-photo").addEventListener("click", () => {
+  childPhotoDataUrl = null;
+  document.getElementById("nc-avatar-preview").innerHTML = document.getElementById("nc-avatar").value || "🧒";
+  document.getElementById("nc-clear-photo").style.display = "none";
+});
+
+document.getElementById("nc-avatar").addEventListener("input", () => {
+  if (!childPhotoDataUrl) {
+    document.getElementById("nc-avatar-preview").textContent = document.getElementById("nc-avatar").value || "🧒";
+  }
+});
+
+document.getElementById("nc-cancel").addEventListener("click", () => {
+  document.getElementById("modal-child").classList.remove("open");
+});
+
+document.getElementById("nc-save").addEventListener("click", async () => {
+  await withGuard(document.getElementById("nc-save"), "createChild", "CREATE_CHILD", async () => {
+    const limit = enforceResourceLimit("children", state.children.length);
+    if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "children" }, "WARNING"); return; }
+    const nameVal = validateText(document.getElementById("nc-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome" });
+    const avatar = sanitizeText(document.getElementById("nc-avatar").value.trim() || "🧒", 4);
+    const age = parseInt(document.getElementById("nc-age").value, 10) || null;
+    if (age !== null && (age < 0 || age > 18)) { alert("Idade inválida (0–18)."); return; }
+    const color = selectedColor;
+    const photoURL = childPhotoDataUrl || null;
+    if (!nameVal.ok) { alert(nameVal.error); return; }
+    if (photoURL) {
+      const imgCheck = validateBase64Image(photoURL);
+      if (!imgCheck.ok) { alert(imgCheck.error); return; }
+    }
+    const deviceId = Math.random().toString(16).slice(2, 10);
+    const docRef = await db.collection("children").add({
+      userId: state.user.uid, name: nameVal.value, avatar, age, color, deviceId, photoURL
+    });
+    const child = { id: docRef.id, userId: state.user.uid, name: nameVal.value, avatar, age, color, deviceId, photoURL };
+    state.children.push(child);
+    logAudit("CREATE_CHILD", { childId: child.id });
+    checkResourceWarning("children", state.children.length);
+    document.getElementById("modal-child").classList.remove("open");
+    renderChildren();
+    selectChild(docRef.id);
+  });
+});
+
+// G: Modal Nova Tarefa — setup emoji grid e days
+function setupTaskModal(task = null) {
+  // Populate estado select
+  const sel = document.getElementById("nt-color");
+  sel.innerHTML = COLORS.map(c => `<option value="${c.key}">${c.label}</option>`).join("");
+
+  // Emoji grid (Icons8)
+  const grid = document.getElementById("emoji-grid");
+  grid.innerHTML = "";
+  selectedTaskEmoji = task ? (task.emoji || "smile") : "smile";
+  SUGGESTED_ICONS.forEach(ic => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.name = ic.name;
+    btn.innerHTML = `<img src="${ic.src}" width="24" height="24" style="display:block;">`;
+    if (ic.name === selectedTaskEmoji) btn.classList.add("selected");
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".emoji-grid button").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedTaskEmoji = ic.name;
+    });
+    grid.appendChild(btn);
+  });
+
+  // Days
+  newTaskDays = task ? [...(task.days || [])] : [0,1,2,3,4,5,6];
+  const daysWrap = document.getElementById("nt-days");
+  daysWrap.innerHTML = "";
+  DAY_LABELS.forEach((label, idx) => {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.type = "button";
+    if (newTaskDays.includes(idx)) btn.classList.add("on");
+    btn.addEventListener("click", () => {
+      if (newTaskDays.includes(idx)) {
+        newTaskDays = newTaskDays.filter(d => d !== idx);
+        btn.classList.remove("on");
+      } else {
+        newTaskDays.push(idx);
+        newTaskDays.sort((a,b) => a-b);
+        btn.classList.add("on");
+      }
+    });
+    daysWrap.appendChild(btn);
+  });
+
+  document.getElementById("nt-time").value = task ? (task.time || "08:00") : "08:00";
+  document.getElementById("nt-name").value = task ? (task.name || "") : "";
+  sel.value = task ? (task.color || COLORS[0].key) : COLORS[0].key;
+
+  editingTaskId = task ? task.id : null;
+  document.getElementById("task-modal-title").textContent = task ? "Editar Tarefa" : "Nova Tarefa";
+  document.getElementById("nt-save").textContent = task ? "Salvar alterações" : "Adicionar tarefa";
+}
+
+function openEditTaskModal(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  setupTaskModal(task);
+  document.getElementById("modal-task").classList.add("open");
+  setTimeout(() => document.getElementById("nt-name").focus(), 80);
+}
+
+// G: Open/close modal task
+document.getElementById("nt-cancel").addEventListener("click", () => {
+  document.getElementById("modal-task").classList.remove("open");
+  editingTaskId = null;
+});
+
+document.getElementById("nt-save").addEventListener("click", saveTask);
+
+async function selectChild(childId) {
+  state.activeChildId = childId;
+  renderChildren();
+  
+  // UTOME Gen 1: subscreve dispositivo para esta criança
+  subscribeDevice(childId);
+
+  // K: Show skeleton while loading
+  const panel = document.getElementById("routine-panel");
+  showTasksSkeleton(panel);
+  
+  if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
+  taskUnsubscribe = db.collection("tasks")
+    .where("childId", "==", childId)
+    .onSnapshot((snap) => {
+      const prevIds = new Set(state.tasks.map(t => t.id));
+      state.tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      state.tasks.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+      const newIds = new Set(state.tasks.map(t => t.id));
+      renderRoutine(prevIds, newIds);
+    }, (err) => {
+      console.error("onSnapshot tasks:", err);
+    });
+}
+
+function renderRoutine(prevIds, newIds) {
+  const child = state.children.find(c => c.id === state.activeChildId);
+  const panel = document.getElementById("routine-panel");
+  if (!child) {
+    panel.innerHTML = '<div class="empty-state"><div class="icon"><img src="https://img.icons8.com/ios-filled/64/FF7A00/target.png"></div><h3>Selecione uma criança</h3></div>';
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="routine-header">
+      <div>
+        <h2>Rotina de ${esc(child.name)}</h2>
+        <p>Configure horários, emojis e recompensas.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="open-copy-routine" title="Copiar rotina para outro(a) filho(a)" style="border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <img src="https://img.icons8.com/ios-filled/14/8B889C/copy.png" style="vertical-align:middle;">Copiar rotina
+        </button>
+        <div class="view-toggle">
+          <button id="btn-view-today" class="${taskView === 'today' ? 'active' : ''}">Hoje</button>
+          <button id="btn-view-week" class="${taskView === 'week' ? 'active' : ''}">Semana</button>
+        </div>
+      </div>
+    </div>
+    <div id="task-list" class="task-list"></div>
+    <div class="add-task-btn-wrap">
+      <button class="add-task-floating" id="open-task-modal">
+        <div class="atf-icon"><img src="https://img.icons8.com/ios-filled/16/8B889C/plus-math.png" style="vertical-align:middle;"></div>
+        Adicionar tarefa
+      </button>
+    </div>
+  `;
+
+  // Set child color on panel for next-task card gradient
+  panel.style.setProperty("--child-color", child.color || "var(--orange)");
+
+  document.getElementById("btn-view-today").addEventListener("click", () => {
+    taskView = "today";
+    document.getElementById("btn-view-today").classList.add("active");
+    document.getElementById("btn-view-week").classList.remove("active");
+    renderTaskList(prevIds, newIds);
+  });
+  document.getElementById("btn-view-week").addEventListener("click", () => {
+    taskView = "week";
+    document.getElementById("btn-view-week").classList.add("active");
+    document.getElementById("btn-view-today").classList.remove("active");
+    renderTaskList(prevIds, newIds);
+  });
+
+  document.getElementById("open-task-modal").addEventListener("click", () => {
+    setupTaskModal();
+    document.getElementById("modal-task").classList.add("open");
+    setTimeout(() => document.getElementById("nt-name").focus(), 80);
+  });
+
+  document.getElementById("open-copy-routine").addEventListener("click", () => {
+    openCopyRoutineModal(child.id, child.name);
+  });
+
+  renderTaskList(prevIds, newIds);
+
+  // UTOME Gen 1: injeta widget de status do dispositivo no painel de rotina
+  injectDeviceDashboardWidget(panel);
+}
+
+function renderTaskList(prevIds, newIds) {
+  const list = document.getElementById("task-list");
+  if (!list) return;
+  const todayIdx = getTodayIdx();
+  
+  let filteredTasks = state.tasks;
+  
+  if (taskView === "today") {
+    filteredTasks = state.tasks.filter(t => (t.days || []).includes(todayIdx));
+    
+    if (!filteredTasks.length) {
+      list.innerHTML = `
+        <div class="no-tasks-today">
+          <div class="icon"><img src="https://img.icons8.com/ios-filled/48/FF7A00/sun.png"></div>
+          <p>Nenhuma tarefa para hoje.<br>Que tal curtir o dia livre?</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // F: Next task card - find next upcoming task
+    const now = new Date();
+    const nowStr = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+    const upcoming = filteredTasks.find(t => (t.time || "00:00") >= nowStr);
+    const nextTask = upcoming || filteredTasks[filteredTasks.length - 1];
+    
+    // Render next task hero card
+    const heroDiv = document.createElement("div");
+    heroDiv.className = "next-task-card";
+    const heroIcon = SUGGESTED_ICONS.find(ic => ic.name === (nextTask.emoji || "star")) || SUGGESTED_ICONS[16];
+    const heroIconSrc = heroIcon ? heroIcon.src : "https://img.icons8.com/ios-filled/32/star.png";
+    heroDiv.innerHTML = `
+      <div class="ntc-icon"><img src="${heroIconSrc}" width="28" height="28" style="display:block;filter:brightness(0) invert(1);"></div>
+      <div class="ntc-info">
+        <div class="ntc-label">${upcoming ? "Próxima tarefa" : "Última tarefa do dia"}</div>
+        <div class="ntc-time">${esc(nextTask.time || "--:--")}</div>
+        <div class="ntc-name">${esc(nextTask.name)}</div>
+      </div>
+    `;
+    list.innerHTML = "";
+    list.appendChild(heroDiv);
+    
+    // Remaining tasks (all, below hero)
+    filteredTasks.forEach(t => {
+      const card = createTaskCard(t, todayIdx, prevIds, newIds);
+      list.appendChild(card);
+    });
+    
+  } else {
+    // Week view
+    if (!state.tasks.length) {
+      list.innerHTML = '<div class="empty-state" style="padding:30px 10px;"><div class="icon"><img src="https://img.icons8.com/ios-filled/48/FF7A00/task-planning.png"></div><h3>Nenhuma tarefa</h3><p>Adicione a primeira tarefa abaixo.</p></div>';
+      return;
+    }
+    list.innerHTML = "";
+    state.tasks.forEach(t => {
+      const card = createTaskCard(t, todayIdx, prevIds, newIds);
+      list.appendChild(card);
+    });
+  }
+}
+
+// I: Create task card with animation support
+function createTaskCard(t, todayIdx, prevIds, newIds) {
+  const card = document.createElement("div");
+  card.className = "task-card";
+  card.dataset.id = t.id;
+  
+  const dayPills = (t.days || []).map(d =>
+    `<span class="task-day-pill${d === todayIdx ? " today" : ""}">${DAY_LABELS[d]}</span>`
+  ).join("");
+  const iconObj = SUGGESTED_ICONS.find(ic => ic.name === (t.emoji || "smile")) || SUGGESTED_ICONS[0];
+  const iconSrc = iconObj ? iconObj.src : `https://img.icons8.com/ios-filled/32/smile.png`;
+  card.innerHTML = `
+    <div class="task-heart ${esc(t.color)}"><img src="${iconSrc}" width="22" height="22" style="display:block;filter:brightness(0) invert(1);"></div>
+    <div class="task-info">
+      <div class="t-hour">${esc(t.time)}</div>
+      <div class="t-name">${esc(t.name)}</div>
+      <div class="task-days">${dayPills}</div>
+    </div>
+    <div class="task-actions">
+      <button title="Editar" data-action="edit" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/edit.png" style="vertical-align:middle;"></button>
+      <button title="Remover" data-action="delete" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/trash.png" style="vertical-align:middle;"></button>
+    </div>
+  `;
+  card.querySelector('[data-action="edit"]').addEventListener("click", () => openEditTaskModal(t.id));
+  card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteTask(t.id, t.name));
+  
+  // I: Enter animation for new tasks
+  if (prevIds && newIds && !prevIds.has(t.id)) {
+    card.classList.add("entering");
+  }
+  
+  return card;
+}
+
+async function saveTask() {
+  await withGuard(document.getElementById("nt-save"), "createTask", editingTaskId ? "UPDATE_TASK" : "CREATE_TASK", async () => {
+    const isEditing = !!editingTaskId;
+    if (!isEditing) {
+      const limit = enforceResourceLimit("tasks", state.tasks.length);
+      if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "tasks" }, "WARNING"); return; }
+    }
+    const time = document.getElementById("nt-time").value;
+    const nameVal = validateText(document.getElementById("nt-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome da tarefa" });
+    const emoji = selectedTaskEmoji || "smile";
+    const color = document.getElementById("nt-color").value;
+    if (!time || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      alert("Horário inválido.");
+      return;
+    }
+    if (!nameVal.ok) {
+      if (!nameVal.value) document.getElementById("nt-name").focus();
+      else alert(nameVal.error);
+      return;
+    }
+    if (!newTaskDays.length) {
+      alert("Selecione ao menos um dia.");
+      return;
+    }
+    if (!COLORS.some(c => c.key === color)) {
+      alert("Estado inválido.");
+      return;
+    }
+    document.getElementById("modal-task").classList.remove("open");
+    if (isEditing) {
+      await db.collection("tasks").doc(editingTaskId).update({
+        time, name: nameVal.value, emoji, color, days: newTaskDays
+      });
+      logAudit("UPDATE_TASK", { taskId: editingTaskId, childId: state.activeChildId });
+      editingTaskId = null;
+    } else {
+      await db.collection("tasks").add({
+        childId: state.activeChildId, time, name: nameVal.value, emoji, color, days: newTaskDays, active: true
+      });
+      logAudit("CREATE_TASK", { childId: state.activeChildId });
+      checkResourceWarning("tasks", state.tasks.length + 1);
+    }
+  });
+}
+
+// ── Copiar rotina de uma criança para outra(s) ──
+function openCopyRoutineModal(sourceChildId, sourceChildName) {
+  const others = state.children.filter(c => c.id !== sourceChildId);
+  if (!others.length) {
+    showToast("Cadastre outra criança para copiar a rotina.");
+    return;
+  }
+  document.getElementById("copy-routine-source-name").textContent = sourceChildName;
+  const list = document.getElementById("copy-routine-list");
+  list.innerHTML = others.map(c => `
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;">
+      <input type="checkbox" value="${esc(c.id)}" style="width:16px;height:16px;cursor:pointer;">
+      <span>${esc(c.avatar || "🧒")} ${esc(c.name)}</span>
+    </label>
+  `).join("");
+
+  const modal = document.getElementById("modal-copy-routine");
+  modal.classList.add("open");
+  modal.dataset.sourceId = sourceChildId;
+}
+
+function closeCopyRoutineModal() {
+  document.getElementById("modal-copy-routine").classList.remove("open");
+}
+
+document.getElementById("copy-routine-cancel").addEventListener("click", closeCopyRoutineModal);
+
+document.getElementById("copy-routine-confirm").addEventListener("click", async () => {
+  const modal = document.getElementById("modal-copy-routine");
+  const sourceChildId = modal.dataset.sourceId;
+  const targetIds = Array.from(document.querySelectorAll("#copy-routine-list input:checked")).map(el => el.value);
+  if (!targetIds.length) {
+    showToast("Selecione ao menos uma criança.");
+    return;
+  }
+  const btn = document.getElementById("copy-routine-confirm");
+  btn.disabled = true;
+  try {
+    const sourceTasksSnap = await db.collection("tasks").where("childId", "==", sourceChildId).get();
+    const sourceTasks = sourceTasksSnap.docs.map(d => d.data());
+    if (!sourceTasks.length) {
+      showToast("Esta criança ainda não tem tarefas para copiar.");
+      return;
+    }
+    for (const targetId of targetIds) {
+      const targetChild = state.children.find(c => c.id === targetId);
+      if (!targetChild) continue;
+      const currentTargetTasksSnap = await db.collection("tasks").where("childId", "==", targetId).get();
+      const availableSlots = UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD - currentTargetTasksSnap.size;
+      if (availableSlots <= 0) {
+        showToast(`"${targetChild.name}" já está no limite de tarefas.`);
+        continue;
+      }
+      const tasksToCopy = sourceTasks.slice(0, availableSlots);
+      const batch = db.batch();
+      tasksToCopy.forEach(t => {
+        const ref = db.collection("tasks").doc();
+        batch.set(ref, {
+          childId: targetId, time: t.time, name: t.name, emoji: t.emoji, color: t.color, days: [...(t.days || [])], active: true
+        });
+      });
+      await batch.commit();
+      logAudit("COPY_ROUTINE", { fromChildId: sourceChildId, toChildId: targetId, count: tasksToCopy.length });
+    }
+    closeCopyRoutineModal();
+    showToast("Rotina copiada com sucesso!");
+  } catch (e) {
+    console.error("[UTOME] Erro ao copiar rotina:", e);
+    showToast("Não foi possível copiar a rotina. Tente novamente.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function deleteTask(taskId, taskName) {
+  // I: Leaving animation
+  const card = document.querySelector(`.task-card[data-id="${taskId}"]`);
+  if (card) {
+    card.classList.add("leaving");
+    await new Promise(r => setTimeout(r, 240));
+  }
+  
+  const removedTask = state.tasks.find(t => t.id === taskId);
+  state.tasks = state.tasks.filter(t => t.id !== taskId);
+  renderTaskList(null, null);
+
+  let undone = false;
+
+  showToast(`"${taskName || "Tarefa"}" removida`, async () => {
+    undone = true;
+    if (removedTask) {
+      state.tasks.push(removedTask);
+      state.tasks.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+      renderTaskList(null, null);
+    }
+  });
+
+  await new Promise(r => setTimeout(r, 4200));
+  if (!undone) {
+    await db.collection("tasks").doc(taskId).delete();
+    logAudit("DELETE_TASK", { taskId });
+  }
+}
+
+// Toast (E)
+let _toastTimer = null;
+function showToast(msg, onUndo) {
+  const toast = document.getElementById("toast");
+  const msgEl = document.getElementById("toast-msg");
+  const undoBtn = document.getElementById("toast-undo");
+  msgEl.textContent = msg;
+  undoBtn.style.display = onUndo ? "inline" : "none";
+  toast.classList.add("show");
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove("show"), 4000);
+  undoBtn.onclick = () => {
+    toast.classList.remove("show");
+    if (_toastTimer) clearTimeout(_toastTimer);
+    if (onUndo) onUndo();
+  };
+}
+
+// Modal de confirmação (E)
+function showConfirmModal(title, text) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("modal-confirm");
+    document.getElementById("modal-confirm-title").textContent = title;
+    document.getElementById("modal-confirm-text").textContent = text;
+    modal.classList.add("open");
+    const onOk = () => { modal.classList.remove("open"); cleanup(); resolve(true); };
+    const onCancel = () => { modal.classList.remove("open"); cleanup(); resolve(false); };
+    const cleanup = () => {
+      document.getElementById("modal-confirm-ok").removeEventListener("click", onOk);
+      document.getElementById("modal-confirm-cancel").removeEventListener("click", onCancel);
+    };
+    document.getElementById("modal-confirm-ok").addEventListener("click", onOk);
+    document.getElementById("modal-confirm-cancel").addEventListener("click", onCancel);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// UTOME Gen 1 — Integração com dispositivo físico (ESP32-S3)
+// Versão: v3.0
+// Arquitetura: Web → Firebase Auth → Firestore → ESP32-S3
+// Sem backend próprio. Toda comunicação via Firestore.
+// ════════════════════════════════════════════════════════════
+
+// Estado do dispositivo para a criança selecionada
+let deviceState = {
+  device: null,       // doc de /devices/{deviceId} ou null
+  unsubscribe: null   // listener do Firestore para o dispositivo
+};
+
+// Constantes de dispositivo
+const DEVICE_CFG = {
+  PAIR_CODE_TTL_MS: 10 * 60 * 1000,  // 10 minutos
+  PAIR_CODE_PREFIX: "UTM",
+  BATTERY_LOW: 20,
+  BATTERY_MID: 50
+};
+
+// ── Gerador de código de pareamento ──
+// Formato: UTM-XXXX-XXXX (alfanumérico maiúsculo, sem ambíguos 0/O/I/1)
+function generatePairCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const seg = (n) => Array.from({length: n}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `${DEVICE_CFG.PAIR_CODE_PREFIX}-${seg(4)}-${seg(4)}`;
+}
+
+// ── Criar código de pareamento no Firestore ──
+// Coleção: pairingCodes/{code} → { code, childId, userId, expiresAt, used, createdAt }
+async function createPairingCode(childId) {
+  const code = generatePairCode();
+  const now = firebase.firestore.Timestamp.now();
+  const expiresAt = new Date(Date.now() + DEVICE_CFG.PAIR_CODE_TTL_MS);
+  await db.collection("pairingCodes").doc(code).set({
+    code,
+    childId,
+    userId: state.user.uid,
+    used: false,
+    expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  logAudit("PAIR_CODE_GENERATED", { code, childId });
+  return { code, expiresAt };
+}
+
+// ── Timer countdown de expiração do código ──
+let _pairTimerInterval = null;
+function startPairTimer(expiresAt) {
+  if (_pairTimerInterval) clearInterval(_pairTimerInterval);
+  const el = document.getElementById("pair-timer-display");
+  const update = () => {
+    if (!el) { clearInterval(_pairTimerInterval); return; }
+    const remaining = Math.max(0, expiresAt.getTime() - Date.now());
+    if (remaining === 0) {
+      el.textContent = "Expirado";
+      clearInterval(_pairTimerInterval);
+      return;
+    }
+    const m = String(Math.floor(remaining / 60000)).padStart(2, "0");
+    const s = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
+    el.textContent = `${m}:${s}`;
+  };
+  update();
+  _pairTimerInterval = setInterval(update, 1000);
+}
+
+// ── Abrir modal de pareamento ──
+async function openPairModal(childId, childName) {
+  document.getElementById("pair-child-name").textContent = childName || "esta criança";
+  document.getElementById("pair-code-display").textContent = "Gerando...";
+  document.getElementById("modal-pair").style.display = "flex";
+  try {
+    const { code, expiresAt } = await createPairingCode(childId);
+    document.getElementById("pair-code-display").textContent = code;
+    startPairTimer(expiresAt);
+  } catch(e) {
+    console.error("[UTOME] Erro ao gerar código de pareamento:", e);
+    document.getElementById("pair-code-display").textContent = "Erro";
+    showToast("Não foi possível gerar o código. Tente novamente.");
+  }
+}
+
+function closePairModal() {
+  document.getElementById("modal-pair").style.display = "none";
+  if (_pairTimerInterval) { clearInterval(_pairTimerInterval); _pairTimerInterval = null; }
+}
+
+document.getElementById("pair-modal-cancel").addEventListener("click", closePairModal);
+
+document.getElementById("pair-regen-btn").addEventListener("click", async () => {
+  const childId = state.activeChildId;
+  if (!childId) return;
+  const child = state.children.find(c => c.id === childId);
+  document.getElementById("pair-code-display").textContent = "Gerando...";
+  if (_pairTimerInterval) clearInterval(_pairTimerInterval);
+  try {
+    const { code, expiresAt } = await createPairingCode(childId);
+    document.getElementById("pair-code-display").textContent = code;
+    startPairTimer(expiresAt);
+    logAudit("PAIR_CODE_REGENERATED", { childId });
+  } catch(e) {
+    showToast("Erro ao gerar novo código.");
+  }
+});
+
+// ── Listener de dispositivo para a criança ──
+// Busca na coleção devices onde childId == activeChildId e userId == uid
+// Usa onSnapshot para manter status em tempo real (bateria, online, firmware)
+function subscribeDevice(childId) {
+  if (deviceState.unsubscribe) {
+    deviceState.unsubscribe();
+    deviceState.unsubscribe = null;
+  }
+  deviceState.device = null;
+
+  if (!childId) {
+    document.getElementById("device-section").style.display = "none";
+    return;
+  }
+
+  document.getElementById("device-section").style.display = "block";
+  document.getElementById("device-panel-content").innerHTML = `
+    <div style="color:var(--muted);font-size:12px;text-align:center;padding:12px;">Verificando dispositivo...</div>
+  `;
+
+  deviceState.unsubscribe = db.collection("devices")
+    .where("childId", "==", childId)
+    .where("userId", "==", state.user.uid)
+    .limit(1)
+    .onSnapshot(snap => {
+      if (snap.empty) {
+        deviceState.device = null;
+      } else {
+        const doc = snap.docs[0];
+        deviceState.device = { id: doc.id, ...doc.data() };
+      }
+      renderDevicePanel();
+      renderDeviceDashboardWidget();
+    }, (err) => {
+      console.warn("[UTOME] Erro ao ouvir dispositivo:", err);
+      renderDevicePanel();
+    });
+}
+
+// ── Render do painel de dispositivo na sidebar ──
+function renderDevicePanel() {
+  const container = document.getElementById("device-panel-content");
+  if (!container) return;
+
+  if (!deviceState.device) {
+    container.innerHTML = `
+      <div class="device-empty">
+        <div class="de-icon">🤖</div>
+        <p>Nenhum UTOME vinculado a esta criança.</p>
+        <button class="btn-pair-device" id="btn-open-pair">+ Conectar dispositivo</button>
+      </div>
+    `;
+    const btn = container.querySelector("#btn-open-pair");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const child = state.children.find(c => c.id === state.activeChildId);
+        if (child) openPairModal(child.id, child.name);
+      });
+    }
+    return;
+  }
+
+  const d = deviceState.device;
+  const isOnline = d.status === "online";
+  const battery = typeof d.battery === "number" ? d.battery : null;
+  const batteryClass = battery !== null ? (battery <= DEVICE_CFG.BATTERY_LOW ? "low" : battery <= DEVICE_CFG.BATTERY_MID ? "mid" : "") : "";
+  const lastSync = d.lastSync ? formatRelativeTime(d.lastSync.toDate ? d.lastSync.toDate() : new Date(d.lastSync)) : "—";
+
+  container.innerHTML = `
+    <div class="device-card">
+      <div class="device-card-header">
+        <div class="device-icon-wrap">🤖</div>
+        <div style="flex:1;min-width:0;">
+          <div class="device-name">${esc(d.name || "UTOME Gen 1")}</div>
+          <div class="device-status-row">
+            <div class="status-dot ${isOnline ? "online" : "offline"}"></div>
+            <span class="status-label">${isOnline ? "Online" : "Offline"}</span>
+          </div>
+        </div>
+      </div>
+      <div class="device-metrics">
+        <div class="device-metric">
+          <span class="dm-label">Bateria</span>
+          <span class="dm-value">${battery !== null ? battery + "%" : "—"}</span>
+          ${battery !== null ? `<div class="battery-bar"><div class="battery-fill ${batteryClass}" style="width:${battery}%"></div></div>` : ""}
+        </div>
+        <div class="device-metric">
+          <span class="dm-label">Firmware</span>
+          <span class="dm-value">${esc(d.firmware || "—")}</span>
+        </div>
+        <div class="device-metric" style="grid-column:1/-1;">
+          <span class="dm-label">Última sincronização</span>
+          <span class="dm-value" style="font-size:12px;font-weight:600;">${lastSync}</span>
+        </div>
+      </div>
+      <div class="device-actions">
+        <button class="btn-device-sm" id="btn-device-rename">Renomear</button>
+        <button class="btn-device-sm danger" id="btn-device-unlink">Desvincular</button>
+      </div>
+    </div>
+  `;
+
+  container.querySelector("#btn-device-rename").addEventListener("click", async () => {
+    const newName = prompt("Novo nome para o dispositivo:", d.name || "UTOME Gen 1");
+    if (!newName || !newName.trim()) return;
+    const safeName = sanitizeText(newName.trim(), 40);
+    try {
+      await db.collection("devices").doc(d.id).update({ name: safeName });
+      logAudit("DEVICE_RENAMED", { deviceId: d.id, name: safeName });
+      showToast("Dispositivo renomeado.");
+    } catch(e) {
+      showToast("Erro ao renomear dispositivo.");
+    }
+  });
+
+  container.querySelector("#btn-device-unlink").addEventListener("click", async () => {
+    const confirmed = await showConfirmModal(
+      "Desvincular dispositivo?",
+      "O UTOME Gen 1 será desconectado desta criança. Você poderá vincular novamente depois."
+    );
+    if (!confirmed) return;
+    try {
+      await db.collection("devices").doc(d.id).update({
+        childId: null,
+        status: "offline",
+        unlinkedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      logAudit("DEVICE_UNLINKED", { deviceId: d.id });
+      showToast("Dispositivo desvinculado.");
+    } catch(e) {
+      showToast("Erro ao desvincular dispositivo.");
+    }
+  });
+}
+
+// ── Widget de dispositivo no dashboard (routine-panel) ──
+// Exibido após o nome da criança no topo do painel de rotina
+function renderDeviceDashboardWidget() {
+  const widget = document.getElementById("device-dashboard-widget");
+  if (!widget) return;
+  if (!deviceState.device) {
+    widget.style.display = "none";
+    return;
+  }
+  const d = deviceState.device;
+  const isOnline = d.status === "online";
+  const battery = typeof d.battery === "number" ? d.battery : null;
+  const lastSync = d.lastSync ? formatRelativeTime(d.lastSync.toDate ? d.lastSync.toDate() : new Date(d.lastSync)) : "—";
+  widget.style.display = "block";
+  widget.innerHTML = `
+    <div class="device-dash-row">
+      <div class="device-dash-icon">🤖</div>
+      <div class="device-dash-info">
+        <div class="device-dash-name">${esc(d.name || "UTOME Gen 1")}</div>
+        <div class="device-dash-meta">
+          <span style="color:${isOnline ? "var(--green)" : "var(--muted)"}">● ${isOnline ? "Online" : "Offline"}</span>
+          &nbsp;·&nbsp; Sync: ${lastSync}
+        </div>
+      </div>
+      ${battery !== null ? `<div class="device-dash-battery">${battery}%</div>` : ""}
+    </div>
+  `;
+}
+
+// ── Formata data relativa amigável ──
+function formatRelativeTime(date) {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return "—";
+  const diff = Date.now() - date.getTime();
+  if (diff < 60000) return "agora mesmo";
+  if (diff < 3600000) return `há ${Math.floor(diff / 60000)} min`;
+  if (diff < 86400000) return `há ${Math.floor(diff / 3600000)}h`;
+  return `há ${Math.floor(diff / 86400000)} dias`;
+}
+
+// ── Integração com selectChild ──
+// Chamado após renderRoutine para injetar o widget no painel
+// O widget é inserido logo abaixo do routine-header
+function injectDeviceDashboardWidget(panel) {
+  // Remove widget anterior se existir
+  const old = panel.querySelector("#device-dashboard-widget");
+  if (old) old.remove();
+  const widget = document.createElement("div");
+  widget.id = "device-dashboard-widget";
+  widget.style.display = "none";
+  // Insere após o routine-header (primeiro filho do panel, após o header)
+  const header = panel.querySelector(".routine-header");
+  if (header) {
+    header.after(widget);
+  } else {
+    panel.prepend(widget);
+  }
+  renderDeviceDashboardWidget();
+}
+
+// ── Loga sincronização ──
+// Chamado futuramente pelo ESP32 via Firestore write em syncLogs
+// Este bloco define a estrutura esperada pelo ESP32 para leitura de tarefas
+// Estrutura syncLogs/{logId}: { deviceId, childId, userId, type, timestamp, details }
+async function logDeviceSync(deviceId, childId, type = "SYNC", details = {}) {
+  try {
+    await db.collection("syncLogs").add({
+      deviceId,
+      childId,
+      userId: state.user.uid,
+      type,
+      details,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(_) {}
+}
+
+// ── Hook em selectChild: subscreve dispositivo ao trocar criança ──
+// subscribeDevice() é chamado diretamente dentro de selectChild (ver acima)
+
+// ── Eventos dos Termos e Políticas Legais ──
+(function setupLegalModal() {
+  const tabTerms = document.getElementById("btn-tab-terms");
+  const contentPrivacy = document.getElementById("content-privacy");
+  const contentTerms = document.getElementById("content-terms");
+  const modalLegal = document.getElementById("modal-legal");
+
+  const selectTab = (tab) => {
+    if (tab === "privacy") {
+      tabPrivacy.style.background = "#fff";
+      tabPrivacy.style.color = "#E55A00";
+      tabTerms.style.background = "rgba(255,255,255,0.2)";
+      tabTerms.style.color = "#fff";
+      contentPrivacy.style.display = "block";
+      contentTerms.style.display = "none";
+    } else {
+      tabTerms.style.background = "#fff";
+      tabTerms.style.color = "#E55A00";
+      tabPrivacy.style.background = "rgba(255,255,255,0.2)";
+      tabPrivacy.style.color = "#fff";
+      contentTerms.style.display = "block";
+      contentPrivacy.style.display = "none";
+    }
+  };
+
+  tabPrivacy.onclick = () => selectTab("privacy");
+  tabTerms.onclick = () => selectTab("terms");
+
+  const openLegal = (tab) => {
+    selectTab(tab);
+    modalLegal.style.display = "flex";
+  };
+  const closeLegal = () => {
+    modalLegal.style.display = "none";
+  };
+
+  document.getElementById("legal-close").onclick = closeLegal;
+  document.getElementById("legal-confirm").onclick = closeLegal;
+
+  document.getElementById("open-terms").onclick = (e) => {
+    e.preventDefault();
+    openLegal("terms");
+  };
+  document.getElementById("open-privacy").onclick = (e) => {
+    e.preventDefault();
+    openLegal("privacy");
+  };
+})();
+</script>
+</body>
