@@ -242,8 +242,10 @@
   .task-days{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
   .task-day-pill{font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--line);}
   .task-day-pill.today{background:var(--orange);color:#fff;border-color:var(--orange);}
-  .task-actions button{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:4px 6px;}
-  .task-actions button:hover{color:#C0392B;}
+  .task-actions{display:flex;align-items:center;gap:2px;}
+  .task-actions button{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:4px 6px;border-radius:8px;transition:background-color .15s,color .15s;}
+  .task-actions button[data-action="edit"]:hover{color:var(--orange);background:rgba(255,122,0,0.1);}
+  .task-actions button[data-action="delete"]:hover{color:#C0392B;background:rgba(231,76,60,0.1);}
 
   /* G: Add task button */
   .add-task-btn-wrap{border-top:1px dashed var(--line);padding-top:16px;}
@@ -253,7 +255,7 @@
   .add-task-floating:hover .atf-icon{background:#FFE8D0;}
 
   /* ── Modais Genéricos (Nova Criança, Nova Tarefa, Perfil, MFA, Confirmação, Legal) ── */
-  #modal-task, #modal-confirm, #modal-profile, #modal-mfa, #modal-child, #modal-legal {
+  #modal-task, #modal-confirm, #modal-profile, #modal-mfa, #modal-child, #modal-legal, #modal-copy-routine {
     display: none;
     position: fixed;
     inset: 0;
@@ -268,10 +270,11 @@
   #modal-profile { z-index: 2500; }
   #modal-child { z-index: 2000; }
   #modal-confirm { z-index: 3000; }
+  #modal-copy-routine { z-index: 3000; }
   #modal-mfa { z-index: 3000; }
   #modal-legal { z-index: 3500; }
 
-  #modal-task.open, #modal-confirm.open, #modal-profile.open, #modal-mfa.open, #modal-child.open, #modal-legal.open {
+  #modal-task.open, #modal-confirm.open, #modal-profile.open, #modal-mfa.open, #modal-child.open, #modal-legal.open, #modal-copy-routine.open {
     display: flex;
   }
   
@@ -281,6 +284,7 @@
   }
   #modal-task.open .modal-task-box,
   #modal-confirm.open .modal-confirm-box,
+  #modal-copy-routine.open .modal-confirm-box,
   #modal-profile.open .profile-box,
   #modal-mfa.open .mfa-box,
   #modal-child.open > div,
@@ -377,6 +381,63 @@
   .btn-upload-child input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
   .btn-clear-child-photo{padding:5px 14px;border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;}
   .btn-clear-child-photo:hover{color:var(--red);}
+
+  /* ── UTOME Gen 1 — Dispositivo ── */
+  .device-section{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;}
+  .device-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px;}
+
+  /* Card sem dispositivo */
+  .device-empty{text-align:center;padding:20px 12px;}
+  .device-empty .de-icon{width:52px;height:52px;border-radius:16px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:26px;}
+  .device-empty p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+  .btn-pair-device{width:100%;padding:9px;border:1.5px dashed var(--orange);border-radius:10px;background:none;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit;}
+  .btn-pair-device:hover{background:rgba(255,122,0,0.07);}
+
+  /* Card com dispositivo */
+  .device-card{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);}
+  .device-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .device-icon-wrap{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+  .device-name{font-weight:700;font-size:14px;color:var(--ink);}
+  .device-status-row{display:flex;align-items:center;gap:6px;margin-top:2px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .status-dot.online{background:#5FCBA3;box-shadow:0 0 0 2px rgba(95,203,163,0.3);}
+  .status-dot.offline{background:var(--muted);}
+  .status-label{font-size:11px;color:var(--muted);}
+  .device-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+  .device-metric{background:var(--bg);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
+  .dm-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+  .dm-value{font-size:14px;font-weight:700;color:var(--ink);font-family:'Quicksand',sans-serif;}
+  .battery-bar{height:4px;border-radius:2px;background:var(--line);margin-top:4px;overflow:hidden;}
+  .battery-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;}
+  .battery-fill.low{background:var(--red);}
+  .battery-fill.mid{background:var(--yellow);}
+  .device-actions{display:flex;gap:6px;margin-top:10px;}
+  .btn-device-sm{flex:1;padding:7px;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+  .btn-device-sm:hover{border-color:var(--orange);color:var(--orange);}
+  .btn-device-sm.danger:hover{border-color:var(--red);color:var(--red);}
+
+  /* Modal de pareamento */
+  .pair-box{background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;}
+  .pair-box h3{font-size:18px;margin-bottom:8px;font-family:'Quicksand',sans-serif;}
+  .pair-box .pair-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .pair-code-wrap{background:var(--bg);border-radius:14px;padding:20px;margin-bottom:16px;}
+  .pair-code{font-family:'Quicksand',sans-serif;font-size:28px;font-weight:700;letter-spacing:3px;color:var(--orange);word-break:break-all;}
+  .pair-code-note{font-size:11px;color:var(--muted);margin-top:6px;}
+  .pair-timer{font-size:12px;color:var(--muted);margin-bottom:20px;}
+  .pair-timer strong{color:var(--ink);}
+  .pair-actions{display:flex;gap:10px;}
+
+  /* Dashboard — widget de dispositivo */
+  #device-dashboard-widget{display:none;}
+  .device-dash-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border-radius:12px;margin-top:10px;}
+  .device-dash-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#FF8C00,#E55A00);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .device-dash-info{flex:1;min-width:0;}
+  .device-dash-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .device-dash-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+  .device-dash-battery{font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;}
+
+  [data-theme="dark"] .device-card{background:var(--card);}
+  [data-theme="dark"] .pair-box{background:var(--card);}
 </style>
 </head>
 <body>
@@ -591,7 +652,7 @@
 <!-- G: Modal Nova Tarefa -->
 <div id="modal-task">
   <div class="modal-task-box">
-    <h2>Nova Tarefa</h2>
+    <h2 id="task-modal-title">Nova Tarefa</h2>
     <div class="modal-task-row">
       <div class="field">
         <label>Hora</label>
@@ -697,6 +758,19 @@
   </div>
 </div>
 
+<!-- Modal: Copiar rotina para outro(s) filho(s) -->
+<div id="modal-copy-routine">
+  <div class="modal-confirm-box" style="max-width:380px;text-align:left;">
+    <h3 style="margin-bottom:8px;">Copiar rotina</h3>
+    <p style="margin-bottom:16px;">Selecione para quem copiar as tarefas de <strong id="copy-routine-source-name"></strong>:</p>
+    <div id="copy-routine-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;max-height:240px;overflow-y:auto;"></div>
+    <div class="modal-confirm-actions">
+      <button class="btn-cancel-modal" id="copy-routine-cancel">Cancelar</button>
+      <button class="btn" id="copy-routine-confirm" style="background:linear-gradient(135deg,#FF8C00,#E55A00);">Copiar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal MFA (login + enrollment) -->
 <div id="modal-mfa">
   <div class="mfa-box">
@@ -786,6 +860,23 @@
   </div>
 </div>
 
+<!-- Modal: Pareamento de dispositivo UTOME Gen 1 -->
+<div id="modal-pair" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);z-index:2500;">
+  <div class="pair-box">
+    <h3>Conectar UTOME Gen 1</h3>
+    <p class="pair-sub">Use este código temporário no seu dispositivo para vinculá-lo a <strong id="pair-child-name">esta criança</strong>.</p>
+    <div class="pair-code-wrap">
+      <div class="pair-code" id="pair-code-display">---</div>
+      <div class="pair-code-note">Insira este código no dispositivo UTOME</div>
+    </div>
+    <div class="pair-timer">Expira em: <strong id="pair-timer-display">10:00</strong></div>
+    <div class="pair-actions">
+      <button class="btn-modal-cancel" id="pair-modal-cancel" style="flex:1;">Fechar</button>
+      <button class="btn" id="pair-regen-btn" style="flex:1;font-size:13px;">Gerar novo código</button>
+    </div>
+  </div>
+</div>
+
 <div id="recaptcha-mfa" style="display:none;"></div>
 
 <div id="app">
@@ -825,6 +916,14 @@
       <h2>Crianças</h2>
       <div id="children-list"></div>
       <button class="add-child-btn" id="add-child-btn">+ Nova criança</button>
+
+      <!-- UTOME Gen 1: Dispositivo vinculado à criança selecionada -->
+      <div class="device-section" id="device-section" style="display:none;">
+        <div class="device-section-title">Meu UTOME</div>
+        <div id="device-panel-content">
+          <!-- Preenchido dinamicamente por renderDevicePanel() -->
+        </div>
+      </div>
     </div>
 
     <div class="panel" id="routine-panel">
@@ -1019,6 +1118,29 @@ function enforceResourceLimit(type, currentCount) {
     return { ok: false, error: `Limite de ${UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD} tarefas por criança.` };
   }
   return { ok: true };
+}
+
+// Aviso não-bloqueante quando o responsável se aproxima (~80%) do limite de
+// crianças ou tarefas. Diferente de enforceResourceLimit (que bloqueia no
+// limite exato), isto apenas avisa com antecedência via toast, sem impedir
+// a ação. Mostra no máximo uma vez por sessão por tipo, para não repetir o
+// aviso a cada tarefa criada.
+const _warnedLimits = { children: false, tasks: {} };
+function checkResourceWarning(type, newCount) {
+  if (type === "children") {
+    const max = UTOME_SEC.LIMITS.MAX_CHILDREN;
+    if (!_warnedLimits.children && newCount >= Math.ceil(max * 0.8) && newCount < max) {
+      _warnedLimits.children = true;
+      showToast(`Você já tem ${newCount} de ${max} crianças cadastradas.`);
+    }
+  } else if (type === "tasks") {
+    const max = UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD;
+    const childId = state.activeChildId;
+    if (childId && !_warnedLimits.tasks[childId] && newCount >= Math.ceil(max * 0.8) && newCount < max) {
+      _warnedLimits.tasks[childId] = true;
+      showToast(`Esta criança já tem ${newCount} de ${max} tarefas cadastradas.`);
+    }
+  }
 }
 
 async function initSessionSecurity(user) {
@@ -1233,6 +1355,7 @@ const SUGGESTED_ICONS = [
   {name:"rainbow", src:"https://img.icons8.com/ios-filled/32/rainbow.png"}
 ];
 let selectedTaskEmoji = "smile";
+let editingTaskId = null;
 
 let state = {user:null,children:[],activeChildId:null,tasks:[]};
 let authMode = "login";
@@ -1436,6 +1559,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
   logAudit("LOGOUT", {});
   clearSessionSecurity();
   if (taskUnsubscribe) { taskUnsubscribe(); taskUnsubscribe = null; }
+  if (deviceState.unsubscribe) { deviceState.unsubscribe(); deviceState.unsubscribe = null; }
   auth.signOut();
 });
 
@@ -1788,6 +1912,7 @@ document.getElementById("nc-save").addEventListener("click", async () => {
     const child = { id: docRef.id, userId: state.user.uid, name: nameVal.value, avatar, age, color, deviceId, photoURL };
     state.children.push(child);
     logAudit("CREATE_CHILD", { childId: child.id });
+    checkResourceWarning("children", state.children.length);
     document.getElementById("modal-child").classList.remove("open");
     renderChildren();
     selectChild(docRef.id);
@@ -1795,15 +1920,15 @@ document.getElementById("nc-save").addEventListener("click", async () => {
 });
 
 // G: Modal Nova Tarefa — setup emoji grid e days
-function setupTaskModal() {
+function setupTaskModal(task = null) {
   // Populate estado select
   const sel = document.getElementById("nt-color");
   sel.innerHTML = COLORS.map(c => `<option value="${c.key}">${c.label}</option>`).join("");
-  
+
   // Emoji grid (Icons8)
   const grid = document.getElementById("emoji-grid");
   grid.innerHTML = "";
-  selectedTaskEmoji = "smile";
+  selectedTaskEmoji = task ? (task.emoji || "smile") : "smile";
   SUGGESTED_ICONS.forEach(ic => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -1817,16 +1942,16 @@ function setupTaskModal() {
     });
     grid.appendChild(btn);
   });
-  
+
   // Days
-  newTaskDays = [0,1,2,3,4,5,6];
+  newTaskDays = task ? [...(task.days || [])] : [0,1,2,3,4,5,6];
   const daysWrap = document.getElementById("nt-days");
   daysWrap.innerHTML = "";
   DAY_LABELS.forEach((label, idx) => {
     const btn = document.createElement("button");
     btn.textContent = label;
     btn.type = "button";
-    btn.classList.add("on");
+    if (newTaskDays.includes(idx)) btn.classList.add("on");
     btn.addEventListener("click", () => {
       if (newTaskDays.includes(idx)) {
         newTaskDays = newTaskDays.filter(d => d !== idx);
@@ -1839,22 +1964,39 @@ function setupTaskModal() {
     });
     daysWrap.appendChild(btn);
   });
-  
-  document.getElementById("nt-time").value = "08:00";
-  document.getElementById("nt-name").value = "";
+
+  document.getElementById("nt-time").value = task ? (task.time || "08:00") : "08:00";
+  document.getElementById("nt-name").value = task ? (task.name || "") : "";
+  sel.value = task ? (task.color || COLORS[0].key) : COLORS[0].key;
+
+  editingTaskId = task ? task.id : null;
+  document.getElementById("task-modal-title").textContent = task ? "Editar Tarefa" : "Nova Tarefa";
+  document.getElementById("nt-save").textContent = task ? "Salvar alterações" : "Adicionar tarefa";
+}
+
+function openEditTaskModal(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  setupTaskModal(task);
+  document.getElementById("modal-task").classList.add("open");
+  setTimeout(() => document.getElementById("nt-name").focus(), 80);
 }
 
 // G: Open/close modal task
 document.getElementById("nt-cancel").addEventListener("click", () => {
   document.getElementById("modal-task").classList.remove("open");
+  editingTaskId = null;
 });
 
-document.getElementById("nt-save").addEventListener("click", addTask);
+document.getElementById("nt-save").addEventListener("click", saveTask);
 
 async function selectChild(childId) {
   state.activeChildId = childId;
   renderChildren();
   
+  // UTOME Gen 1: subscreve dispositivo para esta criança
+  subscribeDevice(childId);
+
   // K: Show skeleton while loading
   const panel = document.getElementById("routine-panel");
   showTasksSkeleton(panel);
@@ -1887,9 +2029,14 @@ function renderRoutine(prevIds, newIds) {
         <h2>Rotina de ${esc(child.name)}</h2>
         <p>Configure horários, emojis e recompensas.</p>
       </div>
-      <div class="view-toggle">
-        <button id="btn-view-today" class="${taskView === 'today' ? 'active' : ''}">Hoje</button>
-        <button id="btn-view-week" class="${taskView === 'week' ? 'active' : ''}">Semana</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="open-copy-routine" title="Copiar rotina para outro(a) filho(a)" style="border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <img src="https://img.icons8.com/ios-filled/14/8B889C/copy.png" style="vertical-align:middle;">Copiar rotina
+        </button>
+        <div class="view-toggle">
+          <button id="btn-view-today" class="${taskView === 'today' ? 'active' : ''}">Hoje</button>
+          <button id="btn-view-week" class="${taskView === 'week' ? 'active' : ''}">Semana</button>
+        </div>
       </div>
     </div>
     <div id="task-list" class="task-list"></div>
@@ -1923,7 +2070,14 @@ function renderRoutine(prevIds, newIds) {
     setTimeout(() => document.getElementById("nt-name").focus(), 80);
   });
 
+  document.getElementById("open-copy-routine").addEventListener("click", () => {
+    openCopyRoutineModal(child.id, child.name);
+  });
+
   renderTaskList(prevIds, newIds);
+
+  // UTOME Gen 1: injeta widget de status do dispositivo no painel de rotina
+  injectDeviceDashboardWidget(panel);
 }
 
 function renderTaskList(prevIds, newIds) {
@@ -2006,9 +2160,13 @@ function createTaskCard(t, todayIdx, prevIds, newIds) {
       <div class="t-name">${esc(t.name)}</div>
       <div class="task-days">${dayPills}</div>
     </div>
-    <div class="task-actions"><button title="Remover" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/trash.png" style="vertical-align:middle;"></button></div>
+    <div class="task-actions">
+      <button title="Editar" data-action="edit" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/edit.png" style="vertical-align:middle;"></button>
+      <button title="Remover" data-action="delete" data-id="${esc(t.id)}"><img src="https://img.icons8.com/ios-filled/18/8B889C/trash.png" style="vertical-align:middle;"></button>
+    </div>
   `;
-  card.querySelector("button").addEventListener("click", () => deleteTask(t.id, t.name));
+  card.querySelector('[data-action="edit"]').addEventListener("click", () => openEditTaskModal(t.id));
+  card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteTask(t.id, t.name));
   
   // I: Enter animation for new tasks
   if (prevIds && newIds && !prevIds.has(t.id)) {
@@ -2018,10 +2176,13 @@ function createTaskCard(t, todayIdx, prevIds, newIds) {
   return card;
 }
 
-async function addTask() {
-  await withGuard(document.getElementById("nt-save"), "createTask", "CREATE_TASK", async () => {
-    const limit = enforceResourceLimit("tasks", state.tasks.length);
-    if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "tasks" }, "WARNING"); return; }
+async function saveTask() {
+  await withGuard(document.getElementById("nt-save"), "createTask", editingTaskId ? "UPDATE_TASK" : "CREATE_TASK", async () => {
+    const isEditing = !!editingTaskId;
+    if (!isEditing) {
+      const limit = enforceResourceLimit("tasks", state.tasks.length);
+      if (!limit.ok) { alert(limit.error); logAudit("RESOURCE_LIMIT", { type: "tasks" }, "WARNING"); return; }
+    }
     const time = document.getElementById("nt-time").value;
     const nameVal = validateText(document.getElementById("nt-name").value, { max: UTOME_SEC.LIMITS.MAX_NAME, label: "Nome da tarefa" });
     const emoji = selectedTaskEmoji || "smile";
@@ -2044,12 +2205,95 @@ async function addTask() {
       return;
     }
     document.getElementById("modal-task").classList.remove("open");
-    await db.collection("tasks").add({
-      childId: state.activeChildId, time, name: nameVal.value, emoji, color, days: newTaskDays, active: true
-    });
-    logAudit("CREATE_TASK", { childId: state.activeChildId });
+    if (isEditing) {
+      await db.collection("tasks").doc(editingTaskId).update({
+        time, name: nameVal.value, emoji, color, days: newTaskDays
+      });
+      logAudit("UPDATE_TASK", { taskId: editingTaskId, childId: state.activeChildId });
+      editingTaskId = null;
+    } else {
+      await db.collection("tasks").add({
+        childId: state.activeChildId, time, name: nameVal.value, emoji, color, days: newTaskDays, active: true
+      });
+      logAudit("CREATE_TASK", { childId: state.activeChildId });
+      checkResourceWarning("tasks", state.tasks.length + 1);
+    }
   });
 }
+
+// ── Copiar rotina de uma criança para outra(s) ──
+function openCopyRoutineModal(sourceChildId, sourceChildName) {
+  const others = state.children.filter(c => c.id !== sourceChildId);
+  if (!others.length) {
+    showToast("Cadastre outra criança para copiar a rotina.");
+    return;
+  }
+  document.getElementById("copy-routine-source-name").textContent = sourceChildName;
+  const list = document.getElementById("copy-routine-list");
+  list.innerHTML = others.map(c => `
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;">
+      <input type="checkbox" value="${esc(c.id)}" style="width:16px;height:16px;cursor:pointer;">
+      <span>${esc(c.avatar || "🧒")} ${esc(c.name)}</span>
+    </label>
+  `).join("");
+
+  const modal = document.getElementById("modal-copy-routine");
+  modal.classList.add("open");
+  modal.dataset.sourceId = sourceChildId;
+}
+
+function closeCopyRoutineModal() {
+  document.getElementById("modal-copy-routine").classList.remove("open");
+}
+
+document.getElementById("copy-routine-cancel").addEventListener("click", closeCopyRoutineModal);
+
+document.getElementById("copy-routine-confirm").addEventListener("click", async () => {
+  const modal = document.getElementById("modal-copy-routine");
+  const sourceChildId = modal.dataset.sourceId;
+  const targetIds = Array.from(document.querySelectorAll("#copy-routine-list input:checked")).map(el => el.value);
+  if (!targetIds.length) {
+    showToast("Selecione ao menos uma criança.");
+    return;
+  }
+  const btn = document.getElementById("copy-routine-confirm");
+  btn.disabled = true;
+  try {
+    const sourceTasksSnap = await db.collection("tasks").where("childId", "==", sourceChildId).get();
+    const sourceTasks = sourceTasksSnap.docs.map(d => d.data());
+    if (!sourceTasks.length) {
+      showToast("Esta criança ainda não tem tarefas para copiar.");
+      return;
+    }
+    for (const targetId of targetIds) {
+      const targetChild = state.children.find(c => c.id === targetId);
+      if (!targetChild) continue;
+      const currentTargetTasksSnap = await db.collection("tasks").where("childId", "==", targetId).get();
+      const availableSlots = UTOME_SEC.LIMITS.MAX_TASKS_PER_CHILD - currentTargetTasksSnap.size;
+      if (availableSlots <= 0) {
+        showToast(`"${targetChild.name}" já está no limite de tarefas.`);
+        continue;
+      }
+      const tasksToCopy = sourceTasks.slice(0, availableSlots);
+      const batch = db.batch();
+      tasksToCopy.forEach(t => {
+        const ref = db.collection("tasks").doc();
+        batch.set(ref, {
+          childId: targetId, time: t.time, name: t.name, emoji: t.emoji, color: t.color, days: [...(t.days || [])], active: true
+        });
+      });
+      await batch.commit();
+      logAudit("COPY_ROUTINE", { fromChildId: sourceChildId, toChildId: targetId, count: tasksToCopy.length });
+    }
+    closeCopyRoutineModal();
+    showToast("Rotina copiada com sucesso!");
+  } catch (e) {
+    console.error("[UTOME] Erro ao copiar rotina:", e);
+    showToast("Não foi possível copiar a rotina. Tente novamente.");
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 async function deleteTask(taskId, taskName) {
   // I: Leaving animation
@@ -2117,9 +2361,329 @@ function showConfirmModal(title, text) {
   });
 }
 
+// ════════════════════════════════════════════════════════════
+// UTOME Gen 1 — Integração com dispositivo físico (ESP32-S3)
+// Versão: v3.0
+// Arquitetura: Web → Firebase Auth → Firestore → ESP32-S3
+// Sem backend próprio. Toda comunicação via Firestore.
+// ════════════════════════════════════════════════════════════
+
+// Estado do dispositivo para a criança selecionada
+let deviceState = {
+  device: null,       // doc de /devices/{deviceId} ou null
+  unsubscribe: null   // listener do Firestore para o dispositivo
+};
+
+// Constantes de dispositivo
+const DEVICE_CFG = {
+  PAIR_CODE_TTL_MS: 10 * 60 * 1000,  // 10 minutos
+  PAIR_CODE_PREFIX: "UTM",
+  BATTERY_LOW: 20,
+  BATTERY_MID: 50
+};
+
+// ── Gerador de código de pareamento ──
+// Formato: UTM-XXXX-XXXX (alfanumérico maiúsculo, sem ambíguos 0/O/I/1)
+function generatePairCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const seg = (n) => Array.from({length: n}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `${DEVICE_CFG.PAIR_CODE_PREFIX}-${seg(4)}-${seg(4)}`;
+}
+
+// ── Criar código de pareamento no Firestore ──
+// Coleção: pairingCodes/{code} → { code, childId, userId, expiresAt, used, createdAt }
+async function createPairingCode(childId) {
+  const code = generatePairCode();
+  const now = firebase.firestore.Timestamp.now();
+  const expiresAt = new Date(Date.now() + DEVICE_CFG.PAIR_CODE_TTL_MS);
+  await db.collection("pairingCodes").doc(code).set({
+    code,
+    childId,
+    userId: state.user.uid,
+    used: false,
+    expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  logAudit("PAIR_CODE_GENERATED", { code, childId });
+  return { code, expiresAt };
+}
+
+// ── Timer countdown de expiração do código ──
+let _pairTimerInterval = null;
+function startPairTimer(expiresAt) {
+  if (_pairTimerInterval) clearInterval(_pairTimerInterval);
+  const el = document.getElementById("pair-timer-display");
+  const update = () => {
+    if (!el) { clearInterval(_pairTimerInterval); return; }
+    const remaining = Math.max(0, expiresAt.getTime() - Date.now());
+    if (remaining === 0) {
+      el.textContent = "Expirado";
+      clearInterval(_pairTimerInterval);
+      return;
+    }
+    const m = String(Math.floor(remaining / 60000)).padStart(2, "0");
+    const s = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
+    el.textContent = `${m}:${s}`;
+  };
+  update();
+  _pairTimerInterval = setInterval(update, 1000);
+}
+
+// ── Abrir modal de pareamento ──
+async function openPairModal(childId, childName) {
+  document.getElementById("pair-child-name").textContent = childName || "esta criança";
+  document.getElementById("pair-code-display").textContent = "Gerando...";
+  document.getElementById("modal-pair").style.display = "flex";
+  try {
+    const { code, expiresAt } = await createPairingCode(childId);
+    document.getElementById("pair-code-display").textContent = code;
+    startPairTimer(expiresAt);
+  } catch(e) {
+    console.error("[UTOME] Erro ao gerar código de pareamento:", e);
+    document.getElementById("pair-code-display").textContent = "Erro";
+    showToast("Não foi possível gerar o código. Tente novamente.");
+  }
+}
+
+function closePairModal() {
+  document.getElementById("modal-pair").style.display = "none";
+  if (_pairTimerInterval) { clearInterval(_pairTimerInterval); _pairTimerInterval = null; }
+}
+
+document.getElementById("pair-modal-cancel").addEventListener("click", closePairModal);
+
+document.getElementById("pair-regen-btn").addEventListener("click", async () => {
+  const childId = state.activeChildId;
+  if (!childId) return;
+  const child = state.children.find(c => c.id === childId);
+  document.getElementById("pair-code-display").textContent = "Gerando...";
+  if (_pairTimerInterval) clearInterval(_pairTimerInterval);
+  try {
+    const { code, expiresAt } = await createPairingCode(childId);
+    document.getElementById("pair-code-display").textContent = code;
+    startPairTimer(expiresAt);
+    logAudit("PAIR_CODE_REGENERATED", { childId });
+  } catch(e) {
+    showToast("Erro ao gerar novo código.");
+  }
+});
+
+// ── Listener de dispositivo para a criança ──
+// Busca na coleção devices onde childId == activeChildId e userId == uid
+// Usa onSnapshot para manter status em tempo real (bateria, online, firmware)
+function subscribeDevice(childId) {
+  if (deviceState.unsubscribe) {
+    deviceState.unsubscribe();
+    deviceState.unsubscribe = null;
+  }
+  deviceState.device = null;
+
+  if (!childId) {
+    document.getElementById("device-section").style.display = "none";
+    return;
+  }
+
+  document.getElementById("device-section").style.display = "block";
+  document.getElementById("device-panel-content").innerHTML = `
+    <div style="color:var(--muted);font-size:12px;text-align:center;padding:12px;">Verificando dispositivo...</div>
+  `;
+
+  deviceState.unsubscribe = db.collection("devices")
+    .where("childId", "==", childId)
+    .where("userId", "==", state.user.uid)
+    .limit(1)
+    .onSnapshot(snap => {
+      if (snap.empty) {
+        deviceState.device = null;
+      } else {
+        const doc = snap.docs[0];
+        deviceState.device = { id: doc.id, ...doc.data() };
+      }
+      renderDevicePanel();
+      renderDeviceDashboardWidget();
+    }, (err) => {
+      console.warn("[UTOME] Erro ao ouvir dispositivo:", err);
+      renderDevicePanel();
+    });
+}
+
+// ── Render do painel de dispositivo na sidebar ──
+function renderDevicePanel() {
+  const container = document.getElementById("device-panel-content");
+  if (!container) return;
+
+  if (!deviceState.device) {
+    container.innerHTML = `
+      <div class="device-empty">
+        <div class="de-icon">🤖</div>
+        <p>Nenhum UTOME vinculado a esta criança.</p>
+        <button class="btn-pair-device" id="btn-open-pair">+ Conectar dispositivo</button>
+      </div>
+    `;
+    const btn = container.querySelector("#btn-open-pair");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const child = state.children.find(c => c.id === state.activeChildId);
+        if (child) openPairModal(child.id, child.name);
+      });
+    }
+    return;
+  }
+
+  const d = deviceState.device;
+  const isOnline = d.status === "online";
+  const battery = typeof d.battery === "number" ? d.battery : null;
+  const batteryClass = battery !== null ? (battery <= DEVICE_CFG.BATTERY_LOW ? "low" : battery <= DEVICE_CFG.BATTERY_MID ? "mid" : "") : "";
+  const lastSync = d.lastSync ? formatRelativeTime(d.lastSync.toDate ? d.lastSync.toDate() : new Date(d.lastSync)) : "—";
+
+  container.innerHTML = `
+    <div class="device-card">
+      <div class="device-card-header">
+        <div class="device-icon-wrap">🤖</div>
+        <div style="flex:1;min-width:0;">
+          <div class="device-name">${esc(d.name || "UTOME Gen 1")}</div>
+          <div class="device-status-row">
+            <div class="status-dot ${isOnline ? "online" : "offline"}"></div>
+            <span class="status-label">${isOnline ? "Online" : "Offline"}</span>
+          </div>
+        </div>
+      </div>
+      <div class="device-metrics">
+        <div class="device-metric">
+          <span class="dm-label">Bateria</span>
+          <span class="dm-value">${battery !== null ? battery + "%" : "—"}</span>
+          ${battery !== null ? `<div class="battery-bar"><div class="battery-fill ${batteryClass}" style="width:${battery}%"></div></div>` : ""}
+        </div>
+        <div class="device-metric">
+          <span class="dm-label">Firmware</span>
+          <span class="dm-value">${esc(d.firmware || "—")}</span>
+        </div>
+        <div class="device-metric" style="grid-column:1/-1;">
+          <span class="dm-label">Última sincronização</span>
+          <span class="dm-value" style="font-size:12px;font-weight:600;">${lastSync}</span>
+        </div>
+      </div>
+      <div class="device-actions">
+        <button class="btn-device-sm" id="btn-device-rename">Renomear</button>
+        <button class="btn-device-sm danger" id="btn-device-unlink">Desvincular</button>
+      </div>
+    </div>
+  `;
+
+  container.querySelector("#btn-device-rename").addEventListener("click", async () => {
+    const newName = prompt("Novo nome para o dispositivo:", d.name || "UTOME Gen 1");
+    if (!newName || !newName.trim()) return;
+    const safeName = sanitizeText(newName.trim(), 40);
+    try {
+      await db.collection("devices").doc(d.id).update({ name: safeName });
+      logAudit("DEVICE_RENAMED", { deviceId: d.id, name: safeName });
+      showToast("Dispositivo renomeado.");
+    } catch(e) {
+      showToast("Erro ao renomear dispositivo.");
+    }
+  });
+
+  container.querySelector("#btn-device-unlink").addEventListener("click", async () => {
+    const confirmed = await showConfirmModal(
+      "Desvincular dispositivo?",
+      "O UTOME Gen 1 será desconectado desta criança. Você poderá vincular novamente depois."
+    );
+    if (!confirmed) return;
+    try {
+      await db.collection("devices").doc(d.id).update({
+        childId: null,
+        status: "offline",
+        unlinkedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      logAudit("DEVICE_UNLINKED", { deviceId: d.id });
+      showToast("Dispositivo desvinculado.");
+    } catch(e) {
+      showToast("Erro ao desvincular dispositivo.");
+    }
+  });
+}
+
+// ── Widget de dispositivo no dashboard (routine-panel) ──
+// Exibido após o nome da criança no topo do painel de rotina
+function renderDeviceDashboardWidget() {
+  const widget = document.getElementById("device-dashboard-widget");
+  if (!widget) return;
+  if (!deviceState.device) {
+    widget.style.display = "none";
+    return;
+  }
+  const d = deviceState.device;
+  const isOnline = d.status === "online";
+  const battery = typeof d.battery === "number" ? d.battery : null;
+  const lastSync = d.lastSync ? formatRelativeTime(d.lastSync.toDate ? d.lastSync.toDate() : new Date(d.lastSync)) : "—";
+  widget.style.display = "block";
+  widget.innerHTML = `
+    <div class="device-dash-row">
+      <div class="device-dash-icon">🤖</div>
+      <div class="device-dash-info">
+        <div class="device-dash-name">${esc(d.name || "UTOME Gen 1")}</div>
+        <div class="device-dash-meta">
+          <span style="color:${isOnline ? "var(--green)" : "var(--muted)"}">● ${isOnline ? "Online" : "Offline"}</span>
+          &nbsp;·&nbsp; Sync: ${lastSync}
+        </div>
+      </div>
+      ${battery !== null ? `<div class="device-dash-battery">${battery}%</div>` : ""}
+    </div>
+  `;
+}
+
+// ── Formata data relativa amigável ──
+function formatRelativeTime(date) {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return "—";
+  const diff = Date.now() - date.getTime();
+  if (diff < 60000) return "agora mesmo";
+  if (diff < 3600000) return `há ${Math.floor(diff / 60000)} min`;
+  if (diff < 86400000) return `há ${Math.floor(diff / 3600000)}h`;
+  return `há ${Math.floor(diff / 86400000)} dias`;
+}
+
+// ── Integração com selectChild ──
+// Chamado após renderRoutine para injetar o widget no painel
+// O widget é inserido logo abaixo do routine-header
+function injectDeviceDashboardWidget(panel) {
+  // Remove widget anterior se existir
+  const old = panel.querySelector("#device-dashboard-widget");
+  if (old) old.remove();
+  const widget = document.createElement("div");
+  widget.id = "device-dashboard-widget";
+  widget.style.display = "none";
+  // Insere após o routine-header (primeiro filho do panel, após o header)
+  const header = panel.querySelector(".routine-header");
+  if (header) {
+    header.after(widget);
+  } else {
+    panel.prepend(widget);
+  }
+  renderDeviceDashboardWidget();
+}
+
+// ── Loga sincronização ──
+// Chamado futuramente pelo ESP32 via Firestore write em syncLogs
+// Este bloco define a estrutura esperada pelo ESP32 para leitura de tarefas
+// Estrutura syncLogs/{logId}: { deviceId, childId, userId, type, timestamp, details }
+async function logDeviceSync(deviceId, childId, type = "SYNC", details = {}) {
+  try {
+    await db.collection("syncLogs").add({
+      deviceId,
+      childId,
+      userId: state.user.uid,
+      type,
+      details,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(_) {}
+}
+
+// ── Hook em selectChild: subscreve dispositivo ao trocar criança ──
+// subscribeDevice() é chamado diretamente dentro de selectChild (ver acima)
+
 // ── Eventos dos Termos e Políticas Legais ──
 (function setupLegalModal() {
-  const tabPrivacy = document.getElementById("btn-tab-privacy");
   const tabTerms = document.getElementById("btn-tab-terms");
   const contentPrivacy = document.getElementById("content-privacy");
   const contentTerms = document.getElementById("content-terms");
